@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduNova - Quản lý Học viên</title>
+    <script>
+      // POLYFILL: Prevent "process is not defined" crashes in production browsers
+      window.process = {
+        env: {
+          NODE_ENV: 'production'
+        }
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              primary: '#818cf8', // Indigo 400
+              secondary: '#f472b6', // Pink 400
+              accent: '#2dd4bf', // Teal 400
+              dark: {
+                950: '#020617', // Deepest Background
+                900: '#0f172a', // Main Background
+                800: '#1e293b', // Cards
+                700: '#334155', // Borders
+                600: '#475569', // Inputs
+                500: '#64748b', // Muted
+              }
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.3s ease-out',
+              'slide-up': 'slideUp 0.4s ease-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideUp: {
+                '0%': { transform: 'translateY(20px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Custom scrollbar for webkit */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1; 
+        border-radius: 4px;
+      }
+      :is(.dark) ::-webkit-scrollbar-track {
+        background: #020617;
+      }
+      :is(.dark) ::-webkit-scrollbar-thumb {
+        background: #334155; 
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8; 
+      }
+      :is(.dark) ::-webkit-scrollbar-thumb:hover {
+        background: #475569;
+      }
+      
+      .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+      }
+      :is(.dark) .custom-scrollbar {
+        scrollbar-color: #334155 #020617;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.4.1"
+  }
+}
+</script>
+</head>
+  <body class="bg-gray-50 dark:bg-dark-950 text-slate-900 dark:text-slate-200 antialiased overflow-hidden selection:bg-primary/30 selection:text-indigo-900 dark:selection:text-white transition-colors duration-300">
+    <div id="root"></div>
+    <!-- ENTRY POINT SCRIPT -->
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>
