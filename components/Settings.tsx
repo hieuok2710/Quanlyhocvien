@@ -1,16 +1,18 @@
 
 import React, { useState, useRef } from 'react';
 import { Save, Bell, LayoutList, Monitor, RefreshCw, Database, Download, Upload, History, CheckCircle2, User, Camera, Mail, Briefcase, Moon, Sun, Loader2, Trash2 } from 'lucide-react';
-import { SystemSettings, UserProfile } from '../types';
+import { SystemSettings, UserProfile, Student, ClassRoom } from '../types';
 
 interface SettingsProps {
   settings: SystemSettings;
   onSave: (newSettings: SystemSettings) => void;
   userProfile: UserProfile;
   onUpdateProfile: (newProfile: UserProfile) => void;
+  data: { students: Student[], classes: ClassRoom[] };
+  onRestore: (backupData: any) => void;
 }
 
-const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUpdateProfile }) => {
+const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUpdateProfile, data, onRestore }) => {
   // System Settings State
   const [localSettings, setLocalSettings] = useState<SystemSettings>(settings);
   
@@ -74,10 +76,12 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
   const handleBackup = () => {
     setIsBackingUp(true);
     
-    // Create a mock backup object containing current state
+    // Create a backup object containing current state including DATA
     const backupData = {
         settings: localSettings,
         profile: localProfile,
+        students: data.students,
+        classes: data.classes,
         timestamp: new Date().toISOString(),
         systemVersion: "1.0.0"
     };
@@ -110,14 +114,44 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
 
     setIsRestoring(true);
     
-    // Simulate reading and processing file
-    setTimeout(() => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const jsonContent = event.target?.result as string;
+        const parsedData = JSON.parse(jsonContent);
+        
+        // Basic validation
+        if (!parsedData.systemVersion) {
+           console.warn("Missing version info in backup file");
+        }
+
+        // Call restore handler from App
+        onRestore(parsedData);
+        
+        // Update local state to reflect changes immediately
+        if (parsedData.settings) setLocalSettings(parsedData.settings);
+        if (parsedData.profile) setLocalProfile(parsedData.profile);
+
+        setTimeout(() => {
+          setIsRestoring(false);
+          alert('Khôi phục dữ liệu thành công! Hệ thống đã được cập nhật.');
+        }, 1000);
+
+      } catch (error) {
+        console.error("Restore failed:", error);
+        alert('Lỗi: File sao lưu không hợp lệ hoặc bị hỏng.');
+        setIsRestoring(false);
+      } finally {
+         e.target.value = ''; // Reset input
+      }
+    };
+    
+    reader.onerror = () => {
+      alert('Lỗi khi đọc file.');
       setIsRestoring(false);
-      alert('Khôi phục dữ liệu thành công! Hệ thống sẽ cập nhật trong giây lát.');
-      
-      // Reset input to allow selecting the same file again if needed
-      e.target.value = '';
-    }, 2000);
+    }
+
+    reader.readAsText(file);
   };
 
   return (

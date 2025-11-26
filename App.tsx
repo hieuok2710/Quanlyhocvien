@@ -195,6 +195,26 @@ const App: React.FC = () => {
     }));
   };
 
+  // Restore Handler
+  const handleRestoreData = (backupData: any) => {
+    try {
+      if (backupData.students) {
+        setData(prev => ({ ...prev, students: backupData.students }));
+      }
+      if (backupData.classes) {
+        setData(prev => ({ ...prev, classes: backupData.classes }));
+      }
+      if (backupData.settings) {
+        setSettings(backupData.settings);
+      }
+      if (backupData.profile) {
+        setUserProfile(backupData.profile);
+      }
+    } catch (error) {
+      console.error("Error restoring data in App:", error);
+    }
+  };
+
   const renderContent = () => {
     switch (currentView) {
       case 'DASHBOARD':
@@ -236,6 +256,8 @@ const App: React.FC = () => {
             onSave={handleSaveSettings} 
             userProfile={userProfile}
             onUpdateProfile={handleUpdateProfile}
+            data={data}
+            onRestore={handleRestoreData}
           />
         );
       default:
