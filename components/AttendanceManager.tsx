@@ -22,6 +22,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [highlightedStudentId, setHighlightedStudentId] = useState<string | null>(null);
 
   // Set default selected class when classes data loads
   useEffect(() => {
@@ -311,14 +312,28 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                 <tbody className="divide-y divide-dark-700">
                   {filteredStudents.map((student) => {
                     const stats = getStudentStats(student.id);
+                    const isHighlighted = highlightedStudentId === student.id;
+
                     return (
-                      <tr key={student.id} className="hover:bg-dark-700/30 transition-colors">
+                      <tr 
+                        key={student.id} 
+                        className={`transition-colors duration-200 ${isHighlighted ? 'bg-indigo-500/10 dark:bg-indigo-500/20' : 'hover:bg-dark-700/30'}`}
+                      >
                         {/* Sticky Student Cell */}
-                        <td className="sticky left-0 z-10 bg-dark-800 p-4 border-r border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.3)]">
+                        <td 
+                          onClick={() => setHighlightedStudentId(prev => prev === student.id ? null : student.id)}
+                          className={`sticky left-0 z-10 p-4 border-r border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.3)] cursor-pointer transition-colors duration-200 ${
+                            isHighlighted ? 'bg-indigo-900 border-indigo-700' : 'bg-dark-800'
+                          }`}
+                        >
                            <div className="flex items-center gap-3">
-                              <img src={student.avatar} alt={student.name} className="w-9 h-9 rounded-full border border-dark-600 object-cover" />
+                              <img 
+                                src={student.avatar} 
+                                alt={student.name} 
+                                className={`w-9 h-9 rounded-full border object-cover transition-colors ${isHighlighted ? 'border-indigo-400' : 'border-dark-600'}`} 
+                              />
                               <div className="min-w-0">
-                                 <p className="font-medium text-white text-sm truncate">{student.name}</p>
+                                 <p className={`font-medium text-sm truncate transition-colors ${isHighlighted ? 'text-indigo-200' : 'text-white'}`}>{student.name}</p>
                                  <p className="text-[10px] text-slate-500 truncate">{student.id}</p>
                               </div>
                            </div>
@@ -366,7 +381,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
          )}
          
          <div className="p-3 bg-dark-900/80 border-t border-dark-700 text-xs text-center text-slate-500 backdrop-blur-sm">
-            Mẹo: Nhấn vào ô trạng thái để thay đổi (Trống → Có mặt → Vắng → Muộn)
+            Mẹo: Nhấn vào tên học viên để làm nổi bật dòng • Nhấn vào ô trạng thái để thay đổi
          </div>
       </div>
     </div>
