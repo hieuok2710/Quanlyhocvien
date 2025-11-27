@@ -195,23 +195,29 @@ const App: React.FC = () => {
     }));
   };
 
-  // Restore Handler
+  // Restore Handler - UPDATED: Robust Atomic Update
   const handleRestoreData = (backupData: any) => {
     try {
-      if (backupData.students) {
-        setData(prev => ({ ...prev, students: backupData.students }));
-      }
-      if (backupData.classes) {
-        setData(prev => ({ ...prev, classes: backupData.classes }));
-      }
+      console.log("Restoring backup data:", backupData);
+      
+      // Update Data (Students & Classes) in one go
+      setData(prev => ({
+        students: Array.isArray(backupData.students) ? backupData.students : prev.students,
+        classes: Array.isArray(backupData.classes) ? backupData.classes : prev.classes
+      }));
+
+      // Update Settings if available
       if (backupData.settings) {
-        setSettings(backupData.settings);
+        setSettings(prev => ({ ...prev, ...backupData.settings }));
       }
+
+      // Update Profile if available
       if (backupData.profile) {
-        setUserProfile(backupData.profile);
+        setUserProfile(prev => ({ ...prev, ...backupData.profile }));
       }
     } catch (error) {
       console.error("Error restoring data in App:", error);
+      alert("Đã xảy ra lỗi khi khôi phục dữ liệu. Vui lòng kiểm tra file backup.");
     }
   };
 

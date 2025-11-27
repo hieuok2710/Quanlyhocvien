@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Save, Bell, LayoutList, Monitor, RefreshCw, Database, Download, Upload, History, CheckCircle2, User, Camera, Mail, Briefcase, Moon, Sun, Loader2, Trash2 } from 'lucide-react';
 import { SystemSettings, UserProfile, Student, ClassRoom } from '../types';
@@ -117,12 +116,18 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const jsonContent = event.target?.result as string;
+        let jsonContent = event.target?.result as string;
+        
+        // Remove Byte Order Mark (BOM) if present to prevent parse error
+        if (jsonContent.charCodeAt(0) === 0xFEFF) {
+            jsonContent = jsonContent.slice(1);
+        }
+
         const parsedData = JSON.parse(jsonContent);
         
         // Basic validation
         if (!parsedData.systemVersion) {
-           console.warn("Missing version info in backup file");
+           console.warn("Missing version info in backup file, proceeding anyway.");
         }
 
         // Call restore handler from App
@@ -132,23 +137,27 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
         if (parsedData.settings) setLocalSettings(parsedData.settings);
         if (parsedData.profile) setLocalProfile(parsedData.profile);
 
+        const studentCount = Array.isArray(parsedData.students) ? parsedData.students.length : 0;
+        const classCount = Array.isArray(parsedData.classes) ? parsedData.classes.length : 0;
+
         setTimeout(() => {
           setIsRestoring(false);
-          alert('Khôi phục dữ liệu thành công! Hệ thống đã được cập nhật.');
-        }, 1000);
+          alert(`Khôi phục thành công!\n\n- ${studentCount} Học viên\n- ${classCount} Lớp học\n- Cài đặt hệ thống\n\nDữ liệu đã được cập nhật.`);
+        }, 800);
 
       } catch (error) {
         console.error("Restore failed:", error);
-        alert('Lỗi: File sao lưu không hợp lệ hoặc bị hỏng.');
+        alert('Lỗi: File sao lưu không hợp lệ hoặc bị hỏng. Vui lòng kiểm tra lại file JSON.');
         setIsRestoring(false);
       } finally {
-         e.target.value = ''; // Reset input
+         e.target.value = ''; // Reset input to allow selecting same file again
       }
     };
     
     reader.onerror = () => {
       alert('Lỗi khi đọc file.');
       setIsRestoring(false);
+      e.target.value = '';
     }
 
     reader.readAsText(file);

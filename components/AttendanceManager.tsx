@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { Check, X, Clock, Save, Search, Filter, AlertCircle, Calculator, Download } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Check, X, Clock, Save, Search, Filter, AlertCircle, Calculator, Download, CalendarDays } from 'lucide-react';
 import { Student, ClassRoom } from '../types';
 
 interface AttendanceManagerProps {
@@ -24,6 +24,12 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
   const [isSaving, setIsSaving] = useState(false);
   const [highlightedStudentId, setHighlightedStudentId] = useState<string | null>(null);
 
+  // Default to current month (YYYY-MM)
+  const [selectedMonth, setSelectedMonth] = useState<string>(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
+
   // Set default selected class when classes data loads
   useEffect(() => {
     if (classes.length > 0 && !selectedClass) {
@@ -31,16 +37,32 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     }
   }, [classes, selectedClass]);
 
-  // Initialize 10 date columns (default to last 10 days)
-  const [dateColumns, setDateColumns] = useState<string[]>(() => {
-    const dates = [];
-    for (let i = 9; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      dates.push(d.toISOString().split('T')[0]);
+  // Calculate days in the selected month
+  const daysInMonth = useMemo(() => {
+    if (!selectedMonth) return [];
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const date = new Date(year, month, 0); // Last day of the month
+    const daysCount = date.getDate();
+    
+    const days = [];
+    for (let i = 1; i <= daysCount; i++) {
+      const d = new Date(year, month - 1, i);
+      const dateString = `${year}-${String(month).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+      
+      // Get day of week (0 = Sunday, 1 = Monday...)
+      const dayOfWeek = d.getDay();
+      // Convert to Vietnamese short format
+      const dayLabel = dayOfWeek === 0 ? 'CN' : `T${dayOfWeek + 1}`;
+      
+      days.push({
+        fullDate: dateString,
+        day: i,
+        label: dayLabel,
+        isWeekend: dayOfWeek === 0 || dayOfWeek === 6
+      });
     }
-    return dates;
-  });
+    return days;
+  }, [selectedMonth]);
 
   // State to store attendance matrix
   const [attendanceData, setAttendanceData] = useState<AttendanceHistory>({});
@@ -51,13 +73,6 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     (student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
      student.email.toLowerCase().includes(searchQuery.toLowerCase()))
   );
-
-  // Handle changing a specific date column
-  const handleDateChange = (index: number, newDate: string) => {
-    const newColumns = [...dateColumns];
-    newColumns[index] = newDate;
-    setDateColumns(newColumns);
-  };
 
   // Handle clicking a cell to cycle status
   // NONE -> PRESENT -> ABSENT -> LATE -> NONE
@@ -83,10 +98,10 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
 
   const getStatusIcon = (status: AttendanceStatus) => {
     switch (status) {
-      case 'PRESENT': return <Check className="w-5 h-5 text-emerald-400" />;
-      case 'ABSENT': return <X className="w-5 h-5 text-rose-400" />;
-      case 'LATE': return <Clock className="w-5 h-5 text-amber-400" />;
-      default: return <div className="w-2 h-2 rounded-full bg-dark-700 group-hover:bg-dark-600" />;
+      case 'PRESENT': return <Check className="w-4 h-4 text-emerald-400" />;
+      case 'ABSENT': return <X className="w-4 h-4 text-rose-400" />;
+      case 'LATE': return <Clock className="w-4 h-4 text-amber-400" />;
+      default: return <div className="w-1.5 h-1.5 rounded-full bg-dark-700 group-hover:bg-dark-600" />;
     }
   };
 
@@ -99,18 +114,18 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     }
   };
 
-  // Calculate stats for a student across the 10 columns
+  // Calculate stats for a student across the MONTH
   const getStudentStats = (studentId: string) => {
     const record = attendanceData[studentId] || {};
     let present = 0;
     let totalMarked = 0;
     
-    dateColumns.forEach(date => {
-      const status = record[date];
+    daysInMonth.forEach(({ fullDate }) => {
+      const status = record[fullDate];
       if (status && status !== 'NONE') {
         totalMarked++;
         if (status === 'PRESENT') present += 1;
-        if (status === 'LATE') present += 0.5; // Late counts as half? Or full? Let's say 0.5 for calculation
+        if (status === 'LATE') present += 0.5;
       }
     });
 
@@ -122,7 +137,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     setIsSaving(true);
     setTimeout(() => {
       setIsSaving(false);
-      alert(`Đã lưu dữ liệu điểm danh cho ${filteredStudents.length} học viên.`);
+      alert(`Đã lưu dữ liệu điểm danh tháng ${selectedMonth} cho ${filteredStudents.length} học viên.`);
     }, 1000);
   };
 
@@ -133,7 +148,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     }
 
     // CSV Header
-    const headers = ["Họ và tên", "Mã Học viên", ...dateColumns.map((d, i) => `Ngày ${i + 1} (${d})`), "Tỉ lệ chuyên cần"];
+    const headers = ["Họ và tên", "Mã Học viên", ...daysInMonth.map(d => `${d.day}/${selectedMonth.split('-')[1]} (${d.label})`), "Tỉ lệ chuyên cần"];
     
     // CSV Rows
     const rows = filteredStudents.map(student => {
@@ -144,14 +159,14 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
       ];
 
       // Add status for each date
-      dateColumns.forEach(date => {
-        const status = attendanceData[student.id]?.[date] || 'NONE';
+      daysInMonth.forEach(({ fullDate }) => {
+        const status = attendanceData[student.id]?.[fullDate] || 'NONE';
         let statusText = '';
         switch (status) {
-          case 'PRESENT': statusText = 'Có mặt'; break;
-          case 'ABSENT': statusText = 'Vắng'; break;
-          case 'LATE': statusText = 'Muộn'; break;
-          default: statusText = '-';
+          case 'PRESENT': statusText = 'x'; break; // x for present in Excel usually
+          case 'ABSENT': statusText = 'v'; break;
+          case 'LATE': statusText = 'm'; break;
+          default: statusText = '';
         }
         studentRow.push(`"${statusText}"`);
       });
@@ -170,7 +185,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `Diem_Danh_${selectedClass.replace(/\s+/g, '_') || 'Lop'}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `Diem_Danh_${selectedClass.replace(/\s+/g, '_') || 'Lop'}_Thang_${selectedMonth}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -181,8 +196,8 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
-          <h2 className="text-3xl font-bold text-white mb-1">Sổ Điểm Danh</h2>
-          <p className="text-slate-400">Quản lý chuyên cần theo 10 ngày gần nhất (Tùy chỉnh)</p>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">Sổ Điểm Danh</h2>
+          <p className="text-slate-500 dark:text-slate-400">Quản lý chuyên cần chi tiết theo tháng</p>
         </div>
         
         {/* Actions */}
@@ -206,16 +221,16 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
       </div>
 
       {/* Control Bar */}
-      <div className="bg-dark-800 p-5 rounded-2xl border border-dark-700 mb-6 shadow-xl flex flex-col md:flex-row gap-6 items-center">
+      <div className="bg-white dark:bg-dark-800 p-5 rounded-2xl border border-slate-200 dark:border-dark-700 mb-6 shadow-xl flex flex-col md:flex-row gap-6 items-center">
          {/* Class Selector */}
-         <div className="w-full md:w-1/3">
+         <div className="w-full md:w-1/4">
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Chọn lớp học</label>
             <div className="relative">
                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-400" />
                <select 
                   value={selectedClass}
                   onChange={(e) => setSelectedClass(e.target.value)}
-                  className="w-full bg-dark-950 border border-dark-600 text-white pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-violet-500/50 outline-none appearance-none cursor-pointer hover:border-violet-500/50 transition-colors"
+                  className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-white pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-violet-500/50 outline-none appearance-none cursor-pointer hover:border-violet-500/50 transition-colors"
                >
                   {classes.map(cls => (
                     <option key={cls.id} value={cls.name}>{cls.name}</option>
@@ -225,8 +240,22 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
             </div>
          </div>
 
+         {/* Month Selector */}
+         <div className="w-full md:w-1/4">
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Chọn Tháng</label>
+            <div className="relative">
+               <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+               <input 
+                  type="month"
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 rounded-xl focus:ring-2 focus:ring-primary/50 outline-none cursor-pointer transition-colors font-medium"
+               />
+            </div>
+         </div>
+
          {/* Search */}
-         <div className="w-full md:w-1/3">
+         <div className="w-full md:w-1/4">
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tìm kiếm học viên</label>
             <div className="relative">
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -235,81 +264,98 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                   placeholder="Tên hoặc email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-dark-950 border border-dark-600 text-slate-200 pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-violet-500/50 outline-none transition-all placeholder-slate-600"
+                  className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-slate-200 pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-violet-500/50 outline-none transition-all placeholder-slate-400 dark:placeholder-slate-600"
                />
             </div>
          </div>
 
          {/* Legend */}
-         <div className="w-full md:w-1/3 flex items-center justify-end gap-4 p-3 border border-dashed border-dark-600 rounded-xl">
-             <div className="flex items-center gap-2 text-xs text-slate-400">
-               <Check className="w-4 h-4 text-emerald-400" /> Có mặt
-             </div>
-             <div className="flex items-center gap-2 text-xs text-slate-400">
-               <X className="w-4 h-4 text-rose-400" /> Vắng
-             </div>
-             <div className="flex items-center gap-2 text-xs text-slate-400">
-               <Clock className="w-4 h-4 text-amber-400" /> Muộn
+         <div className="w-full md:w-1/4 flex flex-col justify-center">
+             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 opacity-0 md:opacity-100">Chú thích</label>
+             <div className="flex items-center justify-between p-3 border border-dashed border-slate-300 dark:border-dark-600 rounded-xl bg-slate-50 dark:bg-dark-900/50">
+                 <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                   <Check className="w-3.5 h-3.5 text-emerald-400" /> Có mặt
+                 </div>
+                 <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                   <X className="w-3.5 h-3.5 text-rose-400" /> Vắng
+                 </div>
+                 <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                   <Clock className="w-3.5 h-3.5 text-amber-400" /> Muộn
+                 </div>
              </div>
          </div>
       </div>
 
       {/* Grid Table Container */}
-      <div className="flex-1 bg-dark-800 rounded-2xl border border-dark-700 shadow-xl overflow-hidden flex flex-col relative">
+      <div className="flex-1 bg-white dark:bg-dark-800 rounded-2xl border border-slate-200 dark:border-dark-700 shadow-xl overflow-hidden flex flex-col relative">
          <style>{`
             .attendance-scroll::-webkit-scrollbar {
               width: 10px;
               height: 10px;
             }
             .attendance-scroll::-webkit-scrollbar-track {
-              background: #1e293b; /* dark-800 */
+              background: #f1f5f9;
               border-radius: 0 0 16px 0;
             }
+            :is(.dark) .attendance-scroll::-webkit-scrollbar-track {
+              background: #1e293b;
+            }
             .attendance-scroll::-webkit-scrollbar-thumb {
-              background-color: #475569; /* dark-600 */
+              background-color: #cbd5e1;
               border-radius: 5px;
-              border: 2px solid #1e293b; /* dark-800 */
+              border: 2px solid #f1f5f9;
+            }
+            :is(.dark) .attendance-scroll::-webkit-scrollbar-thumb {
+              background-color: #475569;
+              border: 2px solid #1e293b;
             }
             .attendance-scroll::-webkit-scrollbar-thumb:hover {
-              background-color: #64748b; /* dark-500 */
+              background-color: #94a3b8;
+            }
+            :is(.dark) .attendance-scroll::-webkit-scrollbar-thumb:hover {
+              background-color: #64748b;
             }
             .attendance-scroll::-webkit-scrollbar-corner {
-              background: #1e293b;
+              background: transparent;
             }
          `}</style>
          
          {filteredStudents.length > 0 ? (
             <div className="overflow-auto attendance-scroll flex-1">
               <table className="w-full border-collapse">
-                <thead className="sticky top-0 z-20 bg-dark-900 shadow-md">
+                <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-dark-900 shadow-md">
                   <tr>
                     {/* Sticky Student Column */}
-                    <th className="sticky left-0 z-30 bg-dark-900 p-4 text-left min-w-[250px] border-b border-r border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.3)]">
-                       <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Thông tin học viên</span>
+                    <th className="sticky left-0 z-30 bg-slate-50 dark:bg-dark-900 p-4 text-left min-w-[250px] border-b border-r border-slate-200 dark:border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)]">
+                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Thông tin học viên</span>
                     </th>
                     
-                    {/* 10 Date Columns */}
-                    {dateColumns.map((date, index) => (
-                      <th key={index} className="p-2 min-w-[140px] border-b border-dark-700 bg-dark-900 text-center relative group">
-                        <div className="flex flex-col items-center gap-1">
-                           <span className="text-[10px] text-violet-400 font-bold uppercase tracking-wider">Ngày {index + 1}</span>
-                           <input 
-                              type="date" 
-                              value={date}
-                              onChange={(e) => handleDateChange(index, e.target.value)}
-                              className="bg-dark-800 border border-dark-600 text-white text-xs px-2 py-1 rounded cursor-pointer outline-none focus:border-violet-500 transition-colors w-full text-center"
-                           />
+                    {/* Days of Month Columns */}
+                    {daysInMonth.map((d, index) => (
+                      <th 
+                        key={index} 
+                        className={`p-1 min-w-[40px] border-b border-slate-200 dark:border-dark-700 bg-slate-50 dark:bg-dark-900 text-center relative group ${
+                          d.isWeekend ? 'bg-amber-50/50 dark:bg-amber-900/10' : ''
+                        }`}
+                      >
+                        <div className="flex flex-col items-center justify-center h-12">
+                           <span className={`text-[10px] font-bold uppercase tracking-wider ${d.isWeekend ? 'text-amber-600 dark:text-amber-500' : 'text-slate-500 dark:text-slate-400'}`}>
+                             {d.label}
+                           </span>
+                           <span className={`text-xs font-semibold ${d.isWeekend ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                             {d.day}
+                           </span>
                         </div>
                       </th>
                     ))}
 
                     {/* Stats Column */}
-                    <th className="p-4 min-w-[100px] border-b border-l border-dark-700 bg-dark-900 text-center">
+                    <th className="p-4 min-w-[100px] border-b border-l border-slate-200 dark:border-dark-700 bg-slate-50 dark:bg-dark-900 text-center">
                        <Calculator className="w-4 h-4 text-slate-400 mx-auto" />
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-dark-700">
+                <tbody className="divide-y divide-slate-100 dark:divide-dark-700">
                   {filteredStudents.map((student) => {
                     const stats = getStudentStats(student.id);
                     const isHighlighted = highlightedStudentId === student.id;
@@ -317,37 +363,40 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                     return (
                       <tr 
                         key={student.id} 
-                        className={`transition-colors duration-200 ${isHighlighted ? 'bg-indigo-500/10 dark:bg-indigo-500/20' : 'hover:bg-dark-700/30'}`}
+                        className={`transition-colors duration-200 ${isHighlighted ? 'bg-indigo-50 dark:bg-indigo-500/20' : 'hover:bg-slate-50 dark:hover:bg-dark-700/30'}`}
                       >
                         {/* Sticky Student Cell */}
                         <td 
                           onClick={() => setHighlightedStudentId(prev => prev === student.id ? null : student.id)}
-                          className={`sticky left-0 z-10 p-4 border-r border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.3)] cursor-pointer transition-colors duration-200 ${
-                            isHighlighted ? 'bg-indigo-900 border-indigo-700' : 'bg-dark-800'
+                          className={`sticky left-0 z-10 p-4 border-r border-slate-200 dark:border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)] cursor-pointer transition-colors duration-200 ${
+                            isHighlighted ? 'bg-indigo-100 dark:bg-indigo-900 border-indigo-200 dark:border-indigo-700' : 'bg-white dark:bg-dark-800'
                           }`}
                         >
                            <div className="flex items-center gap-3">
                               <img 
                                 src={student.avatar} 
                                 alt={student.name} 
-                                className={`w-9 h-9 rounded-full border object-cover transition-colors ${isHighlighted ? 'border-indigo-400' : 'border-dark-600'}`} 
+                                className={`w-9 h-9 rounded-full border object-cover transition-colors ${isHighlighted ? 'border-indigo-400' : 'border-slate-200 dark:border-dark-600'}`} 
                               />
                               <div className="min-w-0">
-                                 <p className={`font-medium text-sm truncate transition-colors ${isHighlighted ? 'text-indigo-200' : 'text-white'}`}>{student.name}</p>
+                                 <p className={`font-medium text-sm truncate transition-colors ${isHighlighted ? 'text-indigo-700 dark:text-indigo-200' : 'text-slate-900 dark:text-white'}`}>{student.name}</p>
                                  <p className="text-[10px] text-slate-500 truncate">{student.id}</p>
                               </div>
                            </div>
                         </td>
 
-                        {/* 10 Status Cells */}
-                        {dateColumns.map((date, index) => {
-                           const status = attendanceData[student.id]?.[date] || 'NONE';
+                        {/* Date Status Cells */}
+                        {daysInMonth.map((d, index) => {
+                           const status = attendanceData[student.id]?.[d.fullDate] || 'NONE';
                            return (
-                             <td key={index} className="p-2 text-center border-r border-dark-700/50">
+                             <td 
+                               key={index} 
+                               className={`p-1 text-center border-r border-slate-100 dark:border-dark-700/50 ${d.isWeekend ? 'bg-amber-50/30 dark:bg-amber-900/5' : ''}`}
+                             >
                                 <button
-                                   onClick={() => toggleStatus(student.id, date)}
-                                   className={`w-full h-10 rounded-lg flex items-center justify-center transition-all duration-200 border group active:scale-95 ${getStatusColor(status)}`}
-                                   title={`Click to change status for ${date}`}
+                                   onClick={() => toggleStatus(student.id, d.fullDate)}
+                                   className={`w-full h-8 rounded flex items-center justify-center transition-all duration-200 border group active:scale-95 ${getStatusColor(status)}`}
+                                   title={`${d.day}/${selectedMonth} - Click to change status`}
                                 >
                                    {getStatusIcon(status)}
                                 </button>
@@ -356,12 +405,12 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                         })}
 
                         {/* Stats Cell */}
-                        <td className="p-4 border-l border-dark-700 text-center">
+                        <td className="p-4 border-l border-slate-200 dark:border-dark-700 text-center">
                            <div className="flex flex-col items-center justify-center">
-                              <span className={`text-sm font-bold ${stats.percentage >= 80 ? 'text-emerald-400' : stats.percentage >= 50 ? 'text-amber-400' : 'text-rose-400'}`}>
+                              <span className={`text-sm font-bold ${stats.percentage >= 80 ? 'text-emerald-500 dark:text-emerald-400' : stats.percentage >= 50 ? 'text-amber-500 dark:text-amber-400' : 'text-rose-500 dark:text-rose-400'}`}>
                                  {stats.percentage}%
                               </span>
-                              <span className="text-[10px] text-slate-500">
+                              <span className="text-[10px] text-slate-400">
                                  {stats.totalMarked > 0 ? 'Tỉ lệ' : 'Chưa ghi'}
                               </span>
                            </div>
@@ -380,8 +429,8 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
             </div>
          )}
          
-         <div className="p-3 bg-dark-900/80 border-t border-dark-700 text-xs text-center text-slate-500 backdrop-blur-sm">
-            Mẹo: Nhấn vào tên học viên để làm nổi bật dòng • Nhấn vào ô trạng thái để thay đổi
+         <div className="p-3 bg-white/80 dark:bg-dark-900/80 border-t border-slate-200 dark:border-dark-700 text-xs text-center text-slate-500 backdrop-blur-sm">
+            Mẹo: Nhấn vào tên học viên để làm nổi bật dòng • Các cột màu nhạt là ngày cuối tuần
          </div>
       </div>
     </div>
