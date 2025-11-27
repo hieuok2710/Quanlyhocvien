@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Check, X, Clock, Save, Search, Filter, AlertCircle, Calculator, Download, CalendarDays } from 'lucide-react';
+import { Check, X, Clock, Save, Search, Filter, AlertCircle, Calculator, Download, CalendarDays, CheckSquare } from 'lucide-react';
 import { Student, ClassRoom } from '../types';
 
 interface AttendanceManagerProps {
@@ -93,6 +93,35 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
           [date]: nextStatus
         }
       };
+    });
+  };
+
+  // Quick Attendance: Toggle entire column
+  const handleQuickAttendance = (date: string) => {
+    if (filteredStudents.length === 0) return;
+
+    setAttendanceData(prev => {
+      const nextState = { ...prev };
+      const studentIds = filteredStudents.map(s => s.id);
+      
+      // Check current state of this column
+      // If ALL currently visible students are PRESENT, switch to ABSENT
+      // If ALL are ABSENT, switch to NONE (Clear)
+      // Otherwise (mixed or empty), switch to PRESENT
+      
+      const allPresent = studentIds.every(id => prev[id]?.[date] === 'PRESENT');
+      const allAbsent = studentIds.every(id => prev[id]?.[date] === 'ABSENT');
+
+      let targetStatus: AttendanceStatus = 'PRESENT';
+      if (allPresent) targetStatus = 'ABSENT';
+      else if (allAbsent) targetStatus = 'NONE';
+
+      studentIds.forEach(id => {
+        if (!nextState[id]) nextState[id] = {};
+        nextState[id][date] = targetStatus;
+      });
+
+      return nextState;
     });
   };
 
@@ -333,18 +362,25 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                     {/* Days of Month Columns */}
                     {daysInMonth.map((d, index) => (
                       <th 
-                        key={index} 
-                        className={`p-1 min-w-[40px] border-b border-slate-200 dark:border-dark-700 bg-slate-50 dark:bg-dark-900 text-center relative group ${
+                        key={index}
+                        onClick={() => handleQuickAttendance(d.fullDate)} 
+                        className={`p-1 min-w-[40px] border-b border-slate-200 dark:border-dark-700 bg-slate-50 dark:bg-dark-900 text-center relative group cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors ${
                           d.isWeekend ? 'bg-amber-50/50 dark:bg-amber-900/10' : ''
                         }`}
+                        title="Click để điểm danh nhanh toàn bộ lớp (Có mặt -> Vắng -> Xóa)"
                       >
-                        <div className="flex flex-col items-center justify-center h-12">
+                        <div className="flex flex-col items-center justify-center h-12 group/header">
                            <span className={`text-[10px] font-bold uppercase tracking-wider ${d.isWeekend ? 'text-amber-600 dark:text-amber-500' : 'text-slate-500 dark:text-slate-400'}`}>
                              {d.label}
                            </span>
                            <span className={`text-xs font-semibold ${d.isWeekend ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'}`}>
                              {d.day}
                            </span>
+                           
+                           {/* Hover Indicator */}
+                           <div className="absolute top-0 right-0 p-0.5 opacity-0 group-hover/header:opacity-100 transition-opacity">
+                              <CheckSquare className="w-2.5 h-2.5 text-primary" />
+                           </div>
                         </div>
                       </th>
                     ))}
@@ -430,7 +466,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
          )}
          
          <div className="p-3 bg-white/80 dark:bg-dark-900/80 border-t border-slate-200 dark:border-dark-700 text-xs text-center text-slate-500 backdrop-blur-sm">
-            Mẹo: Nhấn vào tên học viên để làm nổi bật dòng • Các cột màu nhạt là ngày cuối tuần
+            Mẹo: Nhấn vào tên học viên để làm nổi bật dòng • Nhấn vào tiêu đề ngày để điểm danh nhanh cả lớp
          </div>
       </div>
     </div>
