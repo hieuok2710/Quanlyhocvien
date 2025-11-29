@@ -184,6 +184,52 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
     }
   };
 
+  // Export to Excel (CSV)
+  const handleExport = () => {
+    if (processedStudents.length === 0) {
+      alert("Không có dữ liệu học viên để xuất.");
+      return;
+    }
+
+    const headers = [
+      "Mã Học viên",
+      "Họ và Tên",
+      "Email",
+      "Số điện thoại",
+      "Ngày sinh",
+      "Lớp học",
+      "GPA",
+      "Chuyên cần (%)",
+      "Trạng thái",
+      "Học phí"
+    ];
+
+    const rows = processedStudents.map(student => [
+      `"${student.id}"`,
+      `"${student.name}"`,
+      `"${student.email}"`,
+      `"${student.phone}"`,
+      `"${formatDate(student.dob)}"`,
+      `"${student.classId}"`,
+      `"${student.gpa}"`,
+      `"${student.attendance}%"`,
+      `"${student.status}"`,
+      `"${student.tuitionPaid ? 'Đã đóng' : 'Chưa đóng'}"`
+    ]);
+
+    // UTF-8 BOM for Excel support
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Danh_sach_hoc_vien_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <>
       <div className="p-8 h-full flex flex-col animate-fade-in">
@@ -193,7 +239,10 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
             <p className="text-slate-500 dark:text-slate-400">Quản lý thông tin và trạng thái học tập</p>
           </div>
           <div className="flex gap-3">
-             <button className="flex items-center gap-2 px-4 py-2 bg-slate-200 dark:bg-dark-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl border border-slate-300 dark:border-dark-600 hover:bg-slate-300 dark:hover:bg-dark-600 transition-all">
+             <button 
+               onClick={handleExport}
+               className="flex items-center gap-2 px-4 py-2 bg-slate-200 dark:bg-dark-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl border border-slate-300 dark:border-dark-600 hover:bg-slate-300 dark:hover:bg-dark-600 transition-all"
+             >
                <Download className="w-4 h-4" />
                <span className="text-sm font-medium hidden sm:inline">Xuất Excel</span>
              </button>
