@@ -9,6 +9,13 @@ import FeedbackModal from './components/FeedbackModal';
 import { Student, ClassRoom, ViewState, StudentStatus, SystemSettings, UserProfile } from './types';
 import { MessageSquarePlus } from 'lucide-react';
 
+// Keys for LocalStorage
+const STORAGE_KEYS = {
+  DATA: 'edunova_data_v1',
+  SETTINGS: 'edunova_settings_v1',
+  PROFILE: 'edunova_profile_v1'
+};
+
 // Mock Data Generation
 const generateMockData = () => {
   const subjects = ['ReactJS', 'NodeJS', 'Database', 'UI/UX', 'Git/Agile'];
@@ -89,40 +96,92 @@ const generateMockData = () => {
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('DASHBOARD');
-  const [data, setData] = useState<{ students: Student[], classes: ClassRoom[] }>({ students: [], classes: [] });
+  
+  // Initialize Data from LocalStorage or use default empty/mock
+  const [data, setData] = useState<{ students: Student[], classes: ClassRoom[] }>(() => {
+    try {
+      const savedData = localStorage.getItem(STORAGE_KEYS.DATA);
+      return savedData ? JSON.parse(savedData) : null;
+    } catch (e) {
+      console.error("Failed to load data from storage", e);
+      return null;
+    }
+  });
 
   // System Configuration State
-  const [settings, setSettings] = useState<SystemSettings>({
-    itemsPerPage: 10,
-    enableNotifications: true,
-    autoRefresh: false,
-    themeMode: 'light',
-    lastBackupDate: '2023-10-25 14:30'
+  const [settings, setSettings] = useState<SystemSettings>(() => {
+    try {
+      const savedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+      return savedSettings ? JSON.parse(savedSettings) : {
+        itemsPerPage: 10,
+        enableNotifications: true,
+        autoRefresh: false,
+        themeMode: 'light',
+        lastBackupDate: '2023-10-25 14:30'
+      };
+    } catch (e) {
+      return {
+        itemsPerPage: 10,
+        enableNotifications: true,
+        autoRefresh: false,
+        themeMode: 'light',
+        lastBackupDate: ''
+      };
+    }
   });
 
   // User Profile State
-  const [userProfile, setUserProfile] = useState<UserProfile>({
-    name: 'Admin User',
-    role: 'Super Administrator',
-    email: 'admin@edunova.edu.vn',
-    avatar: 'https://picsum.photos/100/100'
+  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
+    try {
+      const savedProfile = localStorage.getItem(STORAGE_KEYS.PROFILE);
+      return savedProfile ? JSON.parse(savedProfile) : {
+        name: 'Admin User',
+        role: 'Super Administrator',
+        email: 'admin@edunova.edu.vn',
+        avatar: 'https://picsum.photos/100/100'
+      };
+    } catch (e) {
+      return {
+        name: 'Admin User',
+        role: 'Super Administrator',
+        email: 'admin@edunova.edu.vn',
+        avatar: 'https://picsum.photos/100/100'
+      };
+    }
   });
 
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
+  // Initial Data Load Effect (Only runs once)
   useEffect(() => {
-    const mockData = generateMockData();
-    setData(mockData);
+    if (!data) {
+      // If no data in local storage, generate mock data
+      const mockData = generateMockData();
+      setData(mockData);
+    }
   }, []);
 
-  // Theme Toggling Effect
+  // Persistence Effects - Auto Save when state changes
   useEffect(() => {
+    if (data) {
+      localStorage.setItem(STORAGE_KEYS.DATA, JSON.stringify(data));
+    }
+  }, [data]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+    
+    // Apply Theme
     if (settings.themeMode === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [settings.themeMode]);
+  }, [settings]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(userProfile));
+  }, [userProfile]);
 
   const handleSaveSettings = (newSettings: SystemSettings) => {
     setSettings(newSettings);
@@ -133,29 +192,39 @@ const App: React.FC = () => {
   };
 
   const handleAddStudent = (newStudent: Student) => {
-    setData(prev => ({
-      ...prev,
-      students: [newStudent, ...prev.students]
-    }));
+    setData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        students: [newStudent, ...prev.students]
+      };
+    });
   };
 
   const handleUpdateStudent = (updatedStudent: Student) => {
-    setData(prev => ({
-      ...prev,
-      students: prev.students.map(s => s.id === updatedStudent.id ? updatedStudent : s)
-    }));
+    setData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        students: prev.students.map(s => s.id === updatedStudent.id ? updatedStudent : s)
+      };
+    });
   };
 
   const handleAddClass = (newClass: ClassRoom) => {
-    setData(prev => ({
-      ...prev,
-      classes: [newClass, ...prev.classes]
-    }));
+    setData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        classes: [newClass, ...prev.classes]
+      };
+    });
   };
 
   const handleUpdateStudentClass = (studentId: string, newClassId: string) => {
     console.log(`Updating student ${studentId} to class: "${newClassId}"`);
     setData(prev => {
+      if (!prev) return prev;
       const newStudents = prev.students.map(s => {
         if (s.id === studentId) {
           return { ...s, classId: newClassId };
@@ -172,6 +241,7 @@ const App: React.FC = () => {
 
   const handleDeleteClass = (classId: string) => {
     setData(prev => {
+      if (!prev) return prev;
       const deletedClass = prev.classes.find(c => c.id === classId);
       return {
         ...prev,
@@ -187,19 +257,25 @@ const App: React.FC = () => {
   };
 
   const handleDeleteStudent = (studentId: string) => {
-    setData(prev => ({
-      ...prev,
-      students: prev.students.filter(s => s.id !== studentId)
-    }));
+    setData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        students: prev.students.filter(s => s.id !== studentId)
+      };
+    });
   };
 
   const handleRestoreData = (backupData: any) => {
     try {
       console.log("Restoring backup data:", backupData);
-      setData(prev => ({
-        students: Array.isArray(backupData.students) ? backupData.students : prev.students,
-        classes: Array.isArray(backupData.classes) ? backupData.classes : prev.classes
-      }));
+      
+      const newData = {
+        students: Array.isArray(backupData.students) ? backupData.students : (data?.students || []),
+        classes: Array.isArray(backupData.classes) ? backupData.classes : (data?.classes || [])
+      };
+      
+      setData(newData);
 
       if (backupData.settings) {
         setSettings(prev => ({ ...prev, ...backupData.settings }));
@@ -215,6 +291,8 @@ const App: React.FC = () => {
   };
 
   const renderContent = () => {
+    if (!data) return <div className="flex items-center justify-center h-full">Loading...</div>;
+
     switch (currentView) {
       case 'DASHBOARD':
         return <Dashboard students={data.students} />;
