@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -355,13 +356,14 @@ const App: React.FC = () => {
       <main className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-50 via-white to-white dark:from-indigo-900/10 dark:via-dark-950 dark:to-dark-950 transition-colors duration-300">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary opacity-50" />
         
-        <div className="flex-1 overflow-hidden relative">
+        {/* Added pb-20 to allow scroll above the bottom mobile nav */}
+        <div className="flex-1 overflow-hidden relative pb-20 md:pb-0">
           {renderContent()}
         </div>
       </main>
 
       {/* FEEDBACK BUTTON */}
-      <div className="fixed z-[100] flex flex-col gap-3 bottom-6 right-6">
+      <div className="fixed z-[100] flex flex-col gap-3 bottom-24 md:bottom-6 right-6">
         <button
           onClick={() => setIsFeedbackOpen(true)}
           className="p-3 bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-full shadow-2xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-110 hover:-rotate-12 transition-all duration-300 group border-2 border-white/20"

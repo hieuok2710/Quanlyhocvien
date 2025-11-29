@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Check, X, Clock, Save, Search, Filter, AlertCircle, Calculator, Download, CalendarDays, CircleDollarSign } from 'lucide-react';
 import { Student, ClassRoom } from '../types';
@@ -234,19 +235,19 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
           </div>
         </div>
         
-        <div className="flex gap-2">
-            <button onClick={handleExport} className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold shadow-lg shadow-emerald-600/30 transition-all text-xs">
+        <div className="flex gap-2 w-full md:w-auto">
+            <button onClick={handleExport} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold shadow-lg shadow-emerald-600/30 transition-all text-xs">
                <Download className="w-3.5 h-3.5" /> Excel
             </button>
-            <button onClick={handleSave} disabled={isSaving} className="flex items-center justify-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg font-bold shadow-lg shadow-violet-600/30 transition-all text-xs">
+            <button onClick={handleSave} disabled={isSaving} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg font-bold shadow-lg shadow-violet-600/30 transition-all text-xs">
                {isSaving ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : <Save className="w-3.5 h-3.5" />}
                {isSaving ? 'Đang lưu' : 'Lưu'}
             </button>
         </div>
       </div>
 
-      {/* Control Bar */}
-      <div className="bg-white dark:bg-dark-800 p-2 md:p-3 rounded-lg border border-slate-200 dark:border-dark-700 mb-2 md:mb-3 shadow-sm flex flex-col md:flex-row gap-4 items-stretch md:items-center shrink-0">
+      {/* Control Bar - Stacked on Mobile */}
+      <div className="bg-white dark:bg-dark-800 p-3 rounded-lg border border-slate-200 dark:border-dark-700 mb-3 shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center shrink-0">
          {/* Class Selector */}
          <div className="w-full md:w-1/4">
             <div className="relative">
