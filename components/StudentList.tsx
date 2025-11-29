@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Plus, Download, Trash2, Edit2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, History, Clock, ArrowUpLeft, LayoutGrid, List, ArrowUpDown, Mail, AlertTriangle, CircleDollarSign, Filter } from 'lucide-react';
 import { Student, StudentStatus } from '../types';
@@ -236,27 +237,27 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
 
   return (
     <>
-      <div className={`p-4 ${isMobile ? 'pb-24 pt-4' : 'md:p-8 md:pb-8'} h-full flex flex-col animate-fade-in`}>
-        <div className={`flex ${isMobile ? 'flex-col gap-3' : 'flex-col md:flex-row justify-between items-start md:items-center gap-4'} mb-6`}>
+      <div className={`p-4 ${isMobile ? 'pb-24 pt-3' : 'md:p-8 md:pb-8'} h-full flex flex-col animate-fade-in`}>
+        <div className={`flex ${isMobile ? 'flex-col gap-2' : 'flex-col md:flex-row justify-between items-start md:items-center gap-4'} mb-3`}>
           <div>
-            <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-slate-900 dark:text-white mb-1`}>Danh sách Học viên</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Quản lý thông tin và trạng thái học tập</p>
+            <h2 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold text-slate-900 dark:text-white mb-0.5`}>Học viên</h2>
+            {!isMobile && <p className="text-sm text-slate-500 dark:text-slate-400">Quản lý thông tin và trạng thái học tập</p>}
           </div>
           <div className={`flex gap-2 ${isMobile ? 'w-full' : 'w-full md:w-auto'}`}>
              <button 
                onClick={handleExport}
-               className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 dark:bg-dark-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl border border-slate-300 dark:border-dark-600 hover:bg-slate-300 dark:hover:bg-dark-600 transition-all text-sm"
+               className={`flex-1 md:flex-none flex items-center justify-center gap-2 ${isMobile ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'} bg-slate-200 dark:bg-dark-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl border border-slate-300 dark:border-dark-600 hover:bg-slate-300 dark:hover:bg-dark-600 transition-all`}
              >
-               <Download className="w-4 h-4" />
-               <span className="font-medium">Xuất Excel</span>
+               <Download className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+               <span className="font-medium">Excel</span>
              </button>
              
              {isAdmin && (
                <button 
                  onClick={handleOpenAdd}
-                 className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-indigo-600 text-white rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95 text-sm"
+                 className={`flex-1 md:flex-none flex items-center justify-center gap-2 ${isMobile ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'} bg-primary hover:bg-indigo-600 text-white rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95`}
                >
-                 <Plus className="w-4 h-4" />
+                 <Plus className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
                  <span className="font-medium">Thêm mới</span>
                </button>
              )}
@@ -264,9 +265,9 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
         </div>
 
         {/* Filters & Controls Bar - UPDATED for Mobile Stacking */}
-        <div className={`bg-white dark:bg-dark-800 p-3 ${isMobile ? 'p-3 flex-col' : 'md:p-4 md:flex-row'} rounded-2xl border border-slate-200 dark:border-dark-700 mb-6 flex gap-3 items-stretch shadow-lg relative z-30`}>
+        <div className={`bg-white dark:bg-dark-800 p-2 md:p-3 ${isMobile ? 'flex-col gap-2' : 'md:flex-row gap-3'} rounded-xl border border-slate-200 dark:border-dark-700 mb-3 flex items-stretch shadow-sm relative z-30`}>
           <div className="relative w-full md:flex-1 md:max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 ${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
             <input 
               type="text" 
               placeholder="Tìm kiếm..." 
@@ -275,7 +276,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
               onKeyDown={handleKeyDown}
               onFocus={() => setShowHistory(true)}
               onBlur={() => setTimeout(() => setShowHistory(false), 200)}
-              className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-dark-600 text-slate-800 dark:text-slate-200 pl-10 pr-4 py-2.5 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder-slate-400 text-sm md:text-base"
+              className={`w-full bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-dark-600 text-slate-800 dark:text-slate-200 pl-9 pr-4 ${isMobile ? 'py-1.5 text-xs' : 'py-2.5 pl-10 text-sm'} rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder-slate-400`}
             />
             
             {/* Search History Dropdown */}
@@ -320,11 +321,11 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
             <div className="relative flex-1 md:flex-none">
               <button 
                 onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
-                className="w-full md:w-auto flex items-center gap-2 px-3 py-2.5 bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-dark-600 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[140px] justify-between"
+                className={`w-full md:w-auto flex items-center gap-2 px-3 ${isMobile ? 'py-1.5' : 'py-2.5'} bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-dark-600 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[120px] justify-between`}
               >
                 <div className="flex items-center gap-2">
-                  <ArrowUpDown className="w-4 h-4" />
-                  <span className="text-sm">
+                  <ArrowUpDown className="w-3.5 h-3.5" />
+                  <span className={isMobile ? 'text-xs' : 'text-sm'}>
                     {sortConfig.key === 'name' ? 'Tên' : sortConfig.key === 'gpa' ? 'GPA' : sortConfig.key === 'attendance' ? 'Chuyên cần' : sortConfig.key === 'tuitionPaid' ? 'Học phí' : 'Ngày tham gia'}
                   </span>
                 </div>
@@ -404,18 +405,18 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
              {/* Force Grid on mobile if viewMode is 'list', or just check viewMode */}
              {(viewMode === 'grid' || isMobile) ? (
                 // GRID VIEW
-                <div className={`grid grid-cols-1 ${isMobile ? '' : 'md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'} gap-4 md:gap-6`}>
+                <div className={`grid grid-cols-1 ${isMobile ? 'gap-2' : 'md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6'}`}>
                   {currentItems.map((student) => (
                     <div 
                       key={student.id} 
                       onClick={() => setSelectedStudent(student)}
-                      className="group bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl p-5 md:p-6 shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col"
+                      className={`group bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl ${isMobile ? 'p-3' : 'p-5 md:p-6'} shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col`}
                     >
                       {/* Top Accent */}
                       <div className={`absolute top-0 left-0 w-full h-1 ${student.gpa >= 8 ? 'bg-emerald-500' : student.gpa >= 5 ? 'bg-primary' : 'bg-rose-500'}`}></div>
                       
                       {/* Tuition Status Indicator (Top Right) */}
-                      <div className="absolute top-3 right-3 z-10">
+                      <div className={`absolute ${isMobile ? 'top-2 right-2' : 'top-3 right-3'} z-10`}>
                         <button 
                           onClick={(e) => toggleTuition(e, student)}
                           className={`p-1.5 rounded-full transition-all duration-300 ${
@@ -425,32 +426,32 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                           }`}
                           title={student.tuitionPaid ? "Đã đóng học phí" : "Chưa đóng học phí"}
                         >
-                          <CircleDollarSign className="w-5 h-5" />
+                          <CircleDollarSign className={isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} />
                         </button>
                       </div>
 
-                      <div className="flex justify-between items-start mb-6">
+                      <div className={`flex justify-between items-start ${isMobile ? 'mb-2' : 'mb-6'}`}>
                          <div className="relative">
-                            <img src={student.avatar} alt={student.name} className="w-16 h-16 rounded-full border-2 border-slate-100 dark:border-dark-600 object-cover group-hover:scale-105 transition-transform" />
-                            <span className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white dark:border-dark-800 flex items-center justify-center text-[10px] font-bold text-white ${student.gpa >= 5 ? 'bg-emerald-500' : 'bg-rose-500'}`}>
+                            <img src={student.avatar} alt={student.name} className={`${isMobile ? 'w-10 h-10' : 'w-16 h-16'} rounded-full border-2 border-slate-100 dark:border-dark-600 object-cover group-hover:scale-105 transition-transform`} />
+                            <span className={`absolute -bottom-1 -right-1 ${isMobile ? 'w-4 h-4 text-[9px]' : 'w-5 h-5 text-[10px]'} rounded-full border-2 border-white dark:border-dark-800 flex items-center justify-center font-bold text-white ${student.gpa >= 5 ? 'bg-emerald-500' : 'bg-rose-500'}`}>
                                {student.gpa}
                             </span>
                          </div>
-                         <div className="flex flex-col items-end pt-5">
-                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${getStatusColor(student.status)}`}>
+                         <div className={`flex flex-col items-end ${isMobile ? 'pt-2' : 'pt-5'}`}>
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide border ${getStatusColor(student.status)}`}>
                               {student.status}
                             </span>
-                            <span className="text-[10px] text-slate-400 mt-2">{student.id}</span>
+                            <span className="text-[9px] text-slate-400 mt-0.5">{student.id}</span>
                          </div>
                       </div>
 
-                      <div className="mb-4 flex-1">
-                         <h3 className="font-bold text-lg text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1" title={student.name}>{student.name}</h3>
-                         <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mt-1 mb-3">
-                            <Mail className="w-3.5 h-3.5" /> <span className="truncate">{student.email}</span>
+                      <div className="mb-2 flex-1">
+                         <h3 className={`font-bold ${isMobile ? 'text-sm' : 'text-lg'} text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1`} title={student.name}>{student.name}</h3>
+                         <div className={`flex items-center gap-2 ${isMobile ? 'text-[10px]' : 'text-sm'} text-slate-500 dark:text-slate-400 mt-0.5 mb-2`}>
+                            <Mail className="w-3 h-3" /> <span className="truncate">{student.email}</span>
                          </div>
-                         <div className="bg-slate-50 dark:bg-dark-900/50 rounded-xl p-3 border border-slate-100 dark:border-dark-700/50">
-                            <div className="flex items-center justify-between text-xs mb-1.5">
+                         <div className={`bg-slate-50 dark:bg-dark-900/50 rounded-lg ${isMobile ? 'p-2' : 'p-3'} border border-slate-100 dark:border-dark-700/50`}>
+                            <div className="flex items-center justify-between text-xs mb-1">
                                <span className="text-slate-500">Lớp học</span>
                                <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[120px]" title={student.classId}>{student.classId || 'Chưa phân lớp'}</span>
                             </div>
@@ -458,29 +459,29 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                                <span className="text-slate-500">Chuyên cần</span>
                                <span className={`font-bold ${student.attendance >= 90 ? 'text-emerald-500' : 'text-amber-500'}`}>{student.attendance}%</span>
                             </div>
-                            <div className="w-full bg-slate-200 dark:bg-dark-700 h-1.5 rounded-full mt-2 overflow-hidden">
+                            <div className={`w-full bg-slate-200 dark:bg-dark-700 ${isMobile ? 'h-1' : 'h-1.5'} rounded-full mt-2 overflow-hidden`}>
                                <div className={`h-full rounded-full ${student.attendance >= 90 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${student.attendance}%` }} />
                             </div>
                          </div>
                       </div>
 
-                      <div className="pt-4 border-t border-slate-100 dark:border-dark-700 flex justify-between items-center mt-auto" onClick={(e) => e.stopPropagation()}>
+                      <div className={`pt-2 border-t border-slate-100 dark:border-dark-700 flex justify-between items-center mt-auto ${isMobile ? 'pt-2' : 'pt-4'}`} onClick={(e) => e.stopPropagation()}>
                          <div className="flex gap-2">
                             {isAdmin ? (
                                <>
                                 <button 
                                   onClick={(e) => handleOpenEdit(e, student)}
-                                  className="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors group/btn relative z-10" 
+                                  className={`text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors group/btn relative z-10 ${isMobile ? 'p-1.5' : 'p-2'}`} 
                                   title="Chỉnh sửa"
                                 >
-                                   <Edit2 className="w-4 h-4" />
+                                   <Edit2 className="w-3.5 h-3.5" />
                                 </button>
                                 <button 
                                   onClick={(e) => initiateDelete(e, student)}
-                                  className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors group/btn relative z-10" 
+                                  className={`text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors group/btn relative z-10 ${isMobile ? 'p-1.5' : 'p-2'}`} 
                                   title="Xóa"
                                 >
-                                   <Trash2 className="w-4 h-4" />
+                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                                </>
                             ) : (
@@ -489,7 +490,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                          </div>
                          <button 
                             onClick={() => setSelectedStudent(student)}
-                            className="text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all"
+                            className="text-[10px] md:text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all"
                          >
                             Chi tiết <ChevronRight className="w-3 h-3" />
                          </button>
@@ -600,8 +601,8 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
         )}
           
         {/* Pagination Footer */}
-        <div className="py-4 border-t border-slate-200 dark:border-dark-700 flex flex-col sm:flex-row justify-between items-center mt-auto gap-4">
-          <span className="text-sm text-slate-500 text-center sm:text-left">
+        <div className="py-2 md:py-4 border-t border-slate-200 dark:border-dark-700 flex flex-col sm:flex-row justify-between items-center mt-auto gap-2">
+          <span className="text-[10px] md:text-xs text-slate-500 text-center sm:text-left">
             {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, processedStudents.length)} / {processedStudents.length}
           </span>
           
@@ -609,38 +610,38 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
             <button 
               onClick={() => setCurrentPage(1)} 
               disabled={currentPage === 1}
-              className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronsLeft className="w-5 h-5" />
+              <ChevronsLeft className="w-4 h-4" />
             </button>
             <button 
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
               disabled={currentPage === 1}
-              className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
             </button>
             
             <div className="flex items-center gap-1 mx-2">
-              <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 {currentPage}
               </span>
-              <span className="text-sm text-slate-500">/ {totalPages}</span>
+              <span className="text-[10px] text-slate-500">/ {totalPages}</span>
             </div>
 
             <button 
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
               disabled={currentPage === totalPages || totalPages === 0}
-              className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </button>
             <button 
               onClick={() => setCurrentPage(totalPages)} 
               disabled={currentPage === totalPages || totalPages === 0}
-              className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronsRight className="w-5 h-5" />
+              <ChevronsRight className="w-4 h-4" />
             </button>
           </div>
         </div>
