@@ -7,7 +7,7 @@ import AttendanceManager from './components/AttendanceManager';
 import Settings from './components/Settings';
 import FeedbackModal from './components/FeedbackModal';
 import { Student, ClassRoom, ViewState, StudentStatus, SystemSettings, UserProfile } from './types';
-import { MessageSquarePlus, Smartphone, Monitor } from 'lucide-react';
+import { MessageSquarePlus } from 'lucide-react';
 
 // Mock Data Generation
 const generateMockData = () => {
@@ -90,7 +90,6 @@ const generateMockData = () => {
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('DASHBOARD');
   const [data, setData] = useState<{ students: Student[], classes: ClassRoom[] }>({ students: [], classes: [] });
-  const [isMobileMode, setIsMobileMode] = useState(false);
   
   // System Configuration State
   const [settings, setSettings] = useState<SystemSettings>({
@@ -274,74 +273,27 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`flex h-screen bg-slate-50 dark:bg-dark-950 text-slate-900 dark:text-slate-200 font-sans transition-colors duration-300 ${isMobileMode ? 'items-center justify-center bg-gray-900 overflow-hidden' : ''}`}>
+    <div className="flex h-screen bg-slate-50 dark:bg-dark-950 text-slate-900 dark:text-slate-200 font-sans transition-colors duration-300">
       
-      {/* WRAPPER: Handles Device Simulation vs Desktop Layout */}
-      <div className={`flex transition-all duration-500 ease-in-out ${
-        isMobileMode 
-          ? 'w-[375px] h-[812px] flex-col rounded-[3rem] border-[8px] border-gray-800 shadow-2xl relative overflow-hidden ring-8 ring-gray-900/50 bg-white dark:bg-dark-950' 
-          : 'w-full h-full flex-row'
-      }`}>
+      {/* SIDEBAR */}
+      <Sidebar 
+        currentView={currentView} 
+        onChangeView={setCurrentView} 
+        userProfile={userProfile}
+      />
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-50 via-white to-white dark:from-indigo-900/10 dark:via-dark-950 dark:to-dark-950 transition-colors duration-300">
+        {/* Optional decorative blur elements */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary opacity-50" />
         
-        {/* MOBILE NOTCH (Only in Mobile Mode) */}
-        {isMobileMode && (
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-gray-800 rounded-b-2xl z-50 pointer-events-none flex items-center justify-center gap-2">
-             <div className="w-10 h-1 rounded-full bg-gray-700/50"></div>
-             <div className="w-1 h-1 rounded-full bg-blue-900/50"></div>
-          </div>
-        )}
+        <div className="flex-1 overflow-hidden relative">
+          {renderContent()}
+        </div>
+      </main>
 
-        {/* SIDEBAR: Left for PC, Bottom for Mobile */}
-        {/* Conditionally render Sidebar location based on mode */}
-        {!isMobileMode && (
-          <Sidebar 
-            currentView={currentView} 
-            onChangeView={setCurrentView} 
-            userProfile={userProfile}
-            isMobile={false}
-          />
-        )}
-
-        {/* Main Content Area */}
-        <main className={`flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-50 via-white to-white dark:from-indigo-900/10 dark:via-dark-950 dark:to-dark-950 transition-colors duration-300 ${isMobileMode ? 'pt-8' : ''}`}>
-          {/* Optional decorative blur elements */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary opacity-50" />
-          
-          <div className="flex-1 overflow-hidden relative">
-            {renderContent()}
-          </div>
-        </main>
-
-        {/* MOBILE BOTTOM NAV */}
-        {isMobileMode && (
-          <Sidebar 
-            currentView={currentView} 
-            onChangeView={setCurrentView} 
-            userProfile={userProfile}
-            isMobile={true}
-          />
-        )}
-      </div>
-
-      {/* Floating Buttons Group (Outside Simulator) */}
+      {/* Floating Buttons Group */}
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3">
-        {/* Device Switcher */}
-        <button
-          onClick={() => setIsMobileMode(!isMobileMode)}
-          className={`p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 group border-2 ${
-            isMobileMode 
-              ? 'bg-white text-gray-900 border-gray-900 hover:border-blue-600' 
-              : 'bg-gray-900 text-white border-transparent hover:bg-gray-800'
-          }`}
-          title={isMobileMode ? "Chuyển sang giao diện Máy tính" : "Chuyển sang giao diện Mobile"}
-        >
-          {isMobileMode ? (
-            <Monitor className="w-6 h-6 group-hover:text-blue-600 transition-colors" />
-          ) : (
-            <Smartphone className="w-6 h-6" />
-          )}
-        </button>
-
         {/* Feedback Button */}
         <button
           onClick={() => setIsFeedbackOpen(true)}
