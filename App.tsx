@@ -7,7 +7,7 @@ import AttendanceManager from './components/AttendanceManager';
 import Settings from './components/Settings';
 import FeedbackModal from './components/FeedbackModal';
 import { Student, ClassRoom, ViewState, StudentStatus, SystemSettings, UserProfile } from './types';
-import { MessageSquarePlus } from 'lucide-react';
+import { MessageSquarePlus, Smartphone, Monitor } from 'lucide-react';
 
 // Mock Data Generation
 const generateMockData = () => {
@@ -87,10 +87,52 @@ const generateMockData = () => {
   return { students, classes };
 };
 
+// APP WRAPPER: Handles Desktop vs Mobile Simulator Layouts
+interface AppWrapperProps {
+  children: React.ReactNode;
+  isMobileMode: boolean;
+}
+
+const AppWrapper: React.FC<AppWrapperProps> = ({ children, isMobileMode }) => {
+  if (isMobileMode) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="relative w-[375px] h-[812px] bg-white dark:bg-dark-950 rounded-[3rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] border-[8px] border-slate-800 overflow-hidden flex flex-col ring-4 ring-slate-700">
+           {/* Notch */}
+           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-slate-800 rounded-b-2xl z-50 flex items-center justify-center gap-4">
+              <div className="w-1.5 h-1.5 rounded-full bg-slate-600/50"></div>
+              <div className="w-12 h-1.5 rounded-full bg-slate-600/50"></div>
+           </div>
+           
+           {/* Status Bar Shim */}
+           <div className="h-8 w-full bg-transparent shrink-0"></div>
+
+           {/* Phone Content */}
+           <div className="flex-1 flex flex-col overflow-hidden relative bg-slate-50 dark:bg-dark-950">
+              {children}
+           </div>
+
+           {/* Home Indicator */}
+           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-slate-900/20 dark:bg-white/20 rounded-full z-50"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col md:flex-row h-screen bg-slate-50 dark:bg-dark-950 text-slate-900 dark:text-slate-200 font-sans transition-colors duration-300">
+      {children}
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('DASHBOARD');
   const [data, setData] = useState<{ students: Student[], classes: ClassRoom[] }>({ students: [], classes: [] });
   
+  // DEVICE SIMULATOR STATE
+  const [isMobileMode, setIsMobileMode] = useState(false);
+
   // System Configuration State
   const [settings, setSettings] = useState<SystemSettings>({
     itemsPerPage: 10,
@@ -153,11 +195,9 @@ const App: React.FC = () => {
     }));
   };
 
-  // ROBUST STATE UPDATE FOR CLASS ASSIGNMENT
   const handleUpdateStudentClass = (studentId: string, newClassId: string) => {
     console.log(`Updating student ${studentId} to class: "${newClassId}"`);
     setData(prev => {
-      // Create a fresh array copy to ensure React detects the change
       const newStudents = prev.students.map(s => {
         if (s.id === studentId) {
           return { ...s, classId: newClassId };
@@ -178,10 +218,9 @@ const App: React.FC = () => {
       return {
         ...prev,
         classes: prev.classes.filter(c => c.id !== classId),
-        // Clean up student class references when a class is deleted
         students: prev.students.map(s => {
           if (s.classId === classId || (deletedClass && s.classId === deletedClass.name)) {
-            return { ...s, classId: '' }; // Reset to free student
+            return { ...s, classId: '' };
           }
           return s;
         })
@@ -196,23 +235,18 @@ const App: React.FC = () => {
     }));
   };
 
-  // Restore Handler - UPDATED: Robust Atomic Update
   const handleRestoreData = (backupData: any) => {
     try {
       console.log("Restoring backup data:", backupData);
-      
-      // Update Data (Students & Classes) in one go
       setData(prev => ({
         students: Array.isArray(backupData.students) ? backupData.students : prev.students,
         classes: Array.isArray(backupData.classes) ? backupData.classes : prev.classes
       }));
 
-      // Update Settings if available
       if (backupData.settings) {
         setSettings(prev => ({ ...prev, ...backupData.settings }));
       }
 
-      // Update Profile if available
       if (backupData.profile) {
         setUserProfile(prev => ({ ...prev, ...backupData.profile }));
       }
@@ -223,9 +257,10 @@ const App: React.FC = () => {
   };
 
   const renderContent = () => {
+    const props = { isMobile: isMobileMode };
     switch (currentView) {
       case 'DASHBOARD':
-        return <Dashboard students={data.students} />;
+        return <Dashboard students={data.students} {...props} />;
       case 'STUDENTS':
         return (
           <StudentList 
@@ -235,6 +270,7 @@ const App: React.FC = () => {
             onUpdateStudent={handleUpdateStudent}
             onDeleteStudent={handleDeleteStudent}
             userRole={userProfile.role}
+            {...props}
           />
         );
       case 'CLASSES':
@@ -247,6 +283,7 @@ const App: React.FC = () => {
             onUpdateStudentClass={handleUpdateStudentClass}
             onDeleteClass={handleDeleteClass}
             userRole={userProfile.role}
+            {...props}
           />
         );
       case 'ATTENDANCE':
@@ -254,6 +291,7 @@ const App: React.FC = () => {
           <AttendanceManager 
             students={data.students} 
             classes={data.classes}
+            {...props}
           />
         );
       case 'SETTINGS':
@@ -265,52 +303,64 @@ const App: React.FC = () => {
             onUpdateProfile={handleUpdateProfile}
             data={data}
             onRestore={handleRestoreData}
+            {...props}
           />
         );
       default:
-        return <Dashboard students={data.students} />;
+        return <Dashboard students={data.students} {...props} />;
     }
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-dark-950 text-slate-900 dark:text-slate-200 font-sans transition-colors duration-300">
-      
-      {/* SIDEBAR */}
-      <Sidebar 
-        currentView={currentView} 
-        onChangeView={setCurrentView} 
-        userProfile={userProfile}
-      />
+    <>
+      {/* Device Toggle Button (Fixed Position) */}
+      <button
+        onClick={() => setIsMobileMode(!isMobileMode)}
+        className="fixed top-4 right-4 z-[9999] p-3 rounded-full bg-white dark:bg-dark-800 text-slate-700 dark:text-slate-200 shadow-xl border border-slate-200 dark:border-dark-700 hover:scale-110 transition-transform group"
+        title={isMobileMode ? "Switch to Desktop View" : "Switch to Mobile App Simulator"}
+      >
+        {isMobileMode ? <Monitor className="w-6 h-6" /> : <Smartphone className="w-6 h-6" />}
+        <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 px-2 py-1 bg-dark-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+          {isMobileMode ? "Giao diện Máy tính" : "Giao diện Mobile"}
+        </span>
+      </button>
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-50 via-white to-white dark:from-indigo-900/10 dark:via-dark-950 dark:to-dark-950 transition-colors duration-300">
-        {/* Optional decorative blur elements */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary opacity-50" />
-        
-        <div className="flex-1 overflow-hidden relative">
-          {renderContent()}
+      <AppWrapper isMobileMode={isMobileMode}>
+        {/* SIDEBAR */}
+        <Sidebar 
+          currentView={currentView} 
+          onChangeView={setCurrentView} 
+          userProfile={userProfile}
+          isMobile={isMobileMode} 
+        />
+
+        {/* MAIN CONTENT */}
+        <main className={`flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-50 via-white to-white dark:from-indigo-900/10 dark:via-dark-950 dark:to-dark-950 transition-colors duration-300 ${isMobileMode ? 'pb-20' : 'pb-20 md:pb-0'}`}>
+          {!isMobileMode && <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary opacity-50" />}
+          
+          <div className="flex-1 overflow-hidden relative">
+            {renderContent()}
+          </div>
+        </main>
+
+        {/* FEEDBACK BUTTON */}
+        <div className={`fixed z-[100] flex flex-col gap-3 ${isMobileMode ? 'bottom-20 right-4' : 'bottom-24 md:bottom-6 right-6'}`}>
+          <button
+            onClick={() => setIsFeedbackOpen(true)}
+            className="p-3 md:p-4 bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-full shadow-2xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-110 hover:-rotate-12 transition-all duration-300 group border-2 border-white/20"
+            title="Gửi phản hồi / Báo lỗi"
+          >
+            <MessageSquarePlus className="w-5 h-5 md:w-6 md:h-6" />
+          </button>
         </div>
-      </main>
 
-      {/* Floating Buttons Group */}
-      <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3">
-        {/* Feedback Button */}
-        <button
-          onClick={() => setIsFeedbackOpen(true)}
-          className="p-4 bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-full shadow-2xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-110 hover:-rotate-12 transition-all duration-300 group border-2 border-white/20"
-          title="Gửi phản hồi / Báo lỗi"
-        >
-          <MessageSquarePlus className="w-6 h-6" />
-        </button>
-      </div>
-
-      {/* Feedback Modal */}
-      <FeedbackModal 
-        isOpen={isFeedbackOpen} 
-        onClose={() => setIsFeedbackOpen(false)}
-        userEmail={userProfile.email}
-      />
-    </div>
+        <FeedbackModal 
+          isOpen={isFeedbackOpen} 
+          onClose={() => setIsFeedbackOpen(false)}
+          userEmail={userProfile.email}
+        />
+      </AppWrapper>
+    </>
   );
 };
 

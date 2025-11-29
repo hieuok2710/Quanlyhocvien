@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Calendar, Users, ChevronRight, Clock, MoreVertical, Plus, Trash2, AlertTriangle, X, ChevronsLeft, ChevronLeft, ChevronsRight, BarChart3, PieChart } from 'lucide-react';
 import { ClassRoom, Student } from '../types';
@@ -14,12 +13,13 @@ interface ClassManagerProps {
   onUpdateStudentClass: (studentId: string, newClassId: string) => void;
   onDeleteClass: (classId: string) => void;
   userRole: string;
+  isMobile?: boolean; // New prop
 }
 
 const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop";
 const ITEMS_PER_PAGE = 12; // Display 12 items per page (3x4 or 4x3 grid)
 
-const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddClass, onAddStudent, onUpdateStudentClass, onDeleteClass, userRole }) => {
+const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddClass, onAddStudent, onUpdateStudentClass, onDeleteClass, userRole, isMobile = false }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassRoom | null>(null);
   
@@ -99,17 +99,17 @@ const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddCla
 
   return (
     <>
-      <div className="p-8 h-full overflow-y-auto pb-20 animate-fade-in flex flex-col custom-scrollbar">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 shrink-0 gap-4">
+      <div className={`p-4 ${isMobile ? 'pb-24' : 'md:p-8 md:pb-20'} h-full overflow-y-auto animate-fade-in flex flex-col custom-scrollbar`}>
+        <div className={`flex ${isMobile ? 'flex-col gap-4' : 'flex-col md:flex-row justify-between items-start md:items-center'} mb-8 shrink-0`}>
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">Quản lý Lớp học</h2>
+            <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-slate-900 dark:text-white mb-1`}>Quản lý Lớp học</h2>
             <p className="text-slate-500 dark:text-slate-400">Danh sách các lớp đang hoạt động</p>
           </div>
           
           {isAdmin && (
             <button 
               onClick={() => setIsAddModalOpen(true)}
-              className="bg-primary hover:bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-primary/25 transition-all active:scale-95 flex items-center gap-2"
+              className="w-full md:w-auto bg-primary hover:bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-primary/25 transition-all active:scale-95 flex items-center justify-center gap-2"
             >
               <Plus className="w-5 h-5" />
               Tạo lớp mới
@@ -119,9 +119,9 @@ const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddCla
 
         {/* --- SUMMARY VISUALIZATION SECTION --- */}
         {classes.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 shrink-0">
+          <div className={`grid grid-cols-1 ${isMobile ? '' : 'lg:grid-cols-3'} gap-6 mb-8 shrink-0`}>
             {/* Chart: Subject Distribution */}
-            <div className="lg:col-span-2 bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div className={`${isMobile ? '' : 'lg:col-span-2'} bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow`}>
               <div className="flex items-center gap-2 mb-4">
                 <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-500">
                   <BarChart3 className="w-5 h-5" />
@@ -195,7 +195,7 @@ const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddCla
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+            <div className={`grid grid-cols-1 ${isMobile ? '' : 'md:grid-cols-2 xl:grid-cols-3'} gap-6 mb-8`}>
               {currentClasses.map((cls) => {
                 const realCount = getRealStudentCount(cls.id, cls.name);
                 return (

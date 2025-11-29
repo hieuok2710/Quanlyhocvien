@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Check, X, Clock, Save, Search, Filter, AlertCircle, Calculator, Download, CalendarDays, CheckSquare, CircleDollarSign } from 'lucide-react';
 import { Student, ClassRoom } from '../types';
@@ -6,6 +5,7 @@ import { Student, ClassRoom } from '../types';
 interface AttendanceManagerProps {
   students: Student[];
   classes: ClassRoom[];
+  isMobile?: boolean; // New prop
 }
 
 type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'NONE';
@@ -24,7 +24,7 @@ interface TuitionHistory {
   };
 }
 
-const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes }) => {
+const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes, isMobile = false }) => {
   
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -261,45 +261,45 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
   };
 
   return (
-    <div className="p-8 h-full flex flex-col animate-fade-in overflow-hidden">
+    <div className={`p-4 ${isMobile ? 'pb-24' : 'md:p-8 md:pb-8'} h-full flex flex-col animate-fade-in overflow-hidden`}>
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+      <div className={`flex ${isMobile ? 'flex-col' : 'flex-col md:flex-row justify-between items-start md:items-center'} gap-4 mb-6`}>
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">Sổ Điểm Danh</h2>
-          <p className="text-slate-500 dark:text-slate-400">Quản lý chuyên cần và học phí chi tiết theo tháng</p>
+          <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-slate-900 dark:text-white mb-1`}>Sổ Điểm Danh</h2>
+          <p className="text-sm md:text-base text-slate-500 dark:text-slate-400">Quản lý chuyên cần và học phí chi tiết theo tháng</p>
         </div>
         
         {/* Actions */}
-        <div className="flex gap-3">
+        <div className={`flex gap-2 ${isMobile ? 'w-full' : 'w-full md:w-auto'}`}>
           <button 
              onClick={handleExport}
-             className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition-all hover:-translate-y-1 active:scale-95"
+             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition-all hover:-translate-y-1 active:scale-95 text-sm"
           >
-             <Download className="w-5 h-5" />
-             <span className="hidden sm:inline">Xuất Excel</span>
+             <Download className="w-4 h-4" />
+             <span className="">Excel</span>
           </button>
           <button 
              onClick={handleSave}
              disabled={isSaving}
-             className="flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed text-sm"
           >
-             {isSaving ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : <Save className="w-5 h-5" />}
-             {isSaving ? 'Đang lưu...' : 'Lưu Thay Đổi'}
+             {isSaving ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : <Save className="w-4 h-4" />}
+             {isSaving ? 'Đang lưu' : 'Lưu Thay Đổi'}
           </button>
         </div>
       </div>
 
-      {/* Control Bar */}
-      <div className="bg-white dark:bg-dark-800 p-5 rounded-2xl border border-slate-200 dark:border-dark-700 mb-6 shadow-xl flex flex-col md:flex-row gap-6 items-center">
+      {/* Control Bar - Mobile Optimized */}
+      <div className={`bg-white dark:bg-dark-800 p-4 rounded-2xl border border-slate-200 dark:border-dark-700 mb-6 shadow-xl flex ${isMobile ? 'flex-col' : 'flex-col md:flex-row'} gap-4 items-stretch md:items-center`}>
          {/* Class Selector */}
-         <div className="w-full md:w-1/4">
+         <div className={`w-full ${isMobile ? '' : 'md:w-1/4'}`}>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Chọn lớp học</label>
             <div className="relative">
                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-400" />
                <select 
                   value={selectedClass}
                   onChange={(e) => setSelectedClass(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-white pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-violet-500/50 outline-none appearance-none cursor-pointer hover:border-violet-500/50 transition-colors"
+                  className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 rounded-xl focus:ring-2 focus:ring-violet-500/50 outline-none appearance-none cursor-pointer hover:border-violet-500/50 transition-colors text-sm font-medium"
                >
                   {classes.map(cls => (
                     <option key={cls.id} value={cls.name}>{cls.name}</option>
@@ -310,7 +310,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
          </div>
 
          {/* Month Selector */}
-         <div className="w-full md:w-1/4">
+         <div className={`w-full ${isMobile ? '' : 'md:w-1/4'}`}>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Chọn Tháng</label>
             <div className="relative">
                <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
@@ -318,13 +318,13 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                   type="month"
                   value={selectedMonth}
                   onChange={(e) => setSelectedMonth(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 rounded-xl focus:ring-2 focus:ring-primary/50 outline-none cursor-pointer transition-colors font-medium"
+                  className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-white pl-10 pr-4 py-2 rounded-xl focus:ring-2 focus:ring-primary/50 outline-none cursor-pointer transition-colors font-medium text-sm"
                />
             </div>
          </div>
 
          {/* Search */}
-         <div className="w-full md:w-1/4">
+         <div className={`w-full ${isMobile ? '' : 'md:w-1/4'}`}>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tìm kiếm học viên</label>
             <div className="relative">
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -333,25 +333,9 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                   placeholder="Tên hoặc email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-slate-200 pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-violet-500/50 outline-none transition-all placeholder-slate-400 dark:placeholder-slate-600"
+                  className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-slate-200 pl-10 pr-4 py-2.5 rounded-xl focus:ring-2 focus:ring-violet-500/50 outline-none transition-all placeholder-slate-400 dark:placeholder-slate-600 text-sm"
                />
             </div>
-         </div>
-
-         {/* Legend */}
-         <div className="w-full md:w-1/4 flex flex-col justify-center">
-             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 opacity-0 md:opacity-100">Chú thích</label>
-             <div className="flex items-center justify-between p-3 border border-dashed border-slate-300 dark:border-dark-600 rounded-xl bg-slate-50 dark:bg-dark-900/50">
-                 <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                   <Check className="w-3.5 h-3.5 text-emerald-400" /> Có mặt
-                 </div>
-                 <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                   <X className="w-3.5 h-3.5 text-rose-400" /> Vắng
-                 </div>
-                 <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                   <CircleDollarSign className="w-3.5 h-3.5 text-amber-400" /> Học phí
-                 </div>
-             </div>
          </div>
       </div>
 
@@ -394,15 +378,15 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
               <table className="w-full border-collapse">
                 <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-dark-900 shadow-md">
                   <tr>
-                    {/* Sticky Student Column */}
-                    <th className="sticky left-0 z-30 bg-slate-50 dark:bg-dark-900 p-4 text-left min-w-[250px] border-b border-r border-slate-200 dark:border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)]">
-                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Thông tin học viên</span>
+                    {/* Sticky Student Column - Resizes on Mobile */}
+                    <th className={`sticky left-0 z-30 bg-slate-50 dark:bg-dark-900 p-4 text-left ${isMobile ? 'min-w-[140px]' : 'min-w-[140px] md:min-w-[250px]'} border-b border-r border-slate-200 dark:border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)]`}>
+                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Học viên</span>
                     </th>
                     
                     {/* Tuition Column */}
-                    <th className="sticky left-[250px] z-30 bg-slate-50 dark:bg-dark-900 p-2 min-w-[100px] border-b border-r border-slate-200 dark:border-dark-700 text-center shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)]">
-                      <span className="text-xs font-bold text-amber-500 uppercase tracking-wider flex items-center justify-center gap-1">
-                         <CircleDollarSign className="w-3.5 h-3.5" /> Học phí
+                    <th className={`sticky ${isMobile ? 'left-[140px] min-w-[80px]' : 'left-[140px] md:left-[250px] min-w-[80px] md:min-w-[100px]'} z-30 bg-slate-50 dark:bg-dark-900 p-2 border-b border-r border-slate-200 dark:border-dark-700 text-center shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)]`}>
+                      <span className="text-[10px] md:text-xs font-bold text-amber-500 uppercase tracking-wider flex items-center justify-center gap-1">
+                         <CircleDollarSign className="w-3 h-3 md:w-3.5 md:h-3.5" /> <span className={isMobile ? 'hidden' : 'hidden md:inline'}>Học phí</span>
                       </span>
                     </th>
 
@@ -433,7 +417,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                     ))}
 
                     {/* Stats Column */}
-                    <th className="p-4 min-w-[100px] border-b border-l border-slate-200 dark:border-dark-700 bg-slate-50 dark:bg-dark-900 text-center">
+                    <th className="p-4 min-w-[80px] border-b border-l border-slate-200 dark:border-dark-700 bg-slate-50 dark:bg-dark-900 text-center">
                        <Calculator className="w-4 h-4 text-slate-400 mx-auto" />
                     </th>
                   </tr>
@@ -452,39 +436,39 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                         {/* Sticky Student Cell */}
                         <td 
                           onClick={() => setHighlightedStudentId(prev => prev === student.id ? null : student.id)}
-                          className={`sticky left-0 z-10 p-4 border-r border-slate-200 dark:border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)] cursor-pointer transition-colors duration-200 ${
+                          className={`sticky left-0 z-10 p-2 md:p-4 border-r border-slate-200 dark:border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)] cursor-pointer transition-colors duration-200 ${
                             isHighlighted ? 'bg-indigo-100 dark:bg-indigo-900 border-indigo-200 dark:border-indigo-700' : 'bg-white dark:bg-dark-800'
                           }`}
                         >
-                           <div className="flex items-center gap-3">
+                           <div className="flex items-center gap-2 md:gap-3">
                               <img 
                                 src={student.avatar} 
                                 alt={student.name} 
-                                className={`w-9 h-9 rounded-full border object-cover transition-colors ${isHighlighted ? 'border-indigo-400' : 'border-slate-200 dark:border-dark-600'}`} 
+                                className={`w-8 h-8 md:w-9 md:h-9 rounded-full border object-cover transition-colors ${isHighlighted ? 'border-indigo-400' : 'border-slate-200 dark:border-dark-600'}`} 
                               />
                               <div className="min-w-0">
-                                 <p className={`font-medium text-sm truncate transition-colors ${isHighlighted ? 'text-indigo-700 dark:text-indigo-200' : 'text-slate-900 dark:text-white'}`}>{student.name}</p>
-                                 <p className="text-[10px] text-slate-500 truncate">{student.id}</p>
+                                 <p className={`font-medium text-xs md:text-sm truncate transition-colors ${isMobile ? 'max-w-[80px]' : 'max-w-[90px] md:max-w-none'} ${isHighlighted ? 'text-indigo-700 dark:text-indigo-200' : 'text-slate-900 dark:text-white'}`}>{student.name}</p>
+                                 <p className={`text-[10px] text-slate-500 truncate ${isMobile ? 'hidden' : 'hidden md:block'}`}>{student.id}</p>
                               </div>
                            </div>
                         </td>
 
                         {/* Tuition Status Cell */}
                         <td 
-                          className={`sticky left-[250px] z-10 p-2 text-center border-r border-slate-200 dark:border-dark-700 transition-colors duration-200 ${
+                          className={`sticky ${isMobile ? 'left-[140px]' : 'left-[140px] md:left-[250px]'} z-10 p-1 md:p-2 text-center border-r border-slate-200 dark:border-dark-700 transition-colors duration-200 ${
                             isHighlighted ? 'bg-indigo-100 dark:bg-indigo-900 border-indigo-200 dark:border-indigo-700' : 'bg-white dark:bg-dark-800'
                           }`}
                         >
                            <button
                              onClick={() => toggleTuition(student.id)}
-                             className={`w-full py-1.5 px-2 rounded-lg text-xs font-bold border transition-all active:scale-95 flex items-center justify-center gap-1 ${
+                             className={`w-full py-1.5 px-1 md:px-2 rounded-lg text-[10px] md:text-xs font-bold border transition-all active:scale-95 flex items-center justify-center gap-1 ${
                                isTuitionPaid 
                                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' 
                                  : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/20'
                              }`}
                            >
-                             <CircleDollarSign className="w-3.5 h-3.5" />
-                             {isTuitionPaid ? 'Đã đóng' : 'Chưa đóng'}
+                             <CircleDollarSign className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                             {isTuitionPaid ? <span className={isMobile ? 'hidden' : 'hidden md:inline'}>Đã đóng</span> : <span className={isMobile ? 'hidden' : 'hidden md:inline'}>Chưa đóng</span>}
                            </button>
                         </td>
 
@@ -508,13 +492,10 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                         })}
 
                         {/* Stats Cell */}
-                        <td className="p-4 border-l border-slate-200 dark:border-dark-700 text-center">
+                        <td className="p-2 md:p-4 border-l border-slate-200 dark:border-dark-700 text-center">
                            <div className="flex flex-col items-center justify-center">
-                              <span className={`text-sm font-bold ${stats.percentage >= 80 ? 'text-emerald-500 dark:text-emerald-400' : stats.percentage >= 50 ? 'text-amber-500 dark:text-amber-400' : 'text-rose-500 dark:text-rose-400'}`}>
+                              <span className={`text-xs md:text-sm font-bold ${stats.percentage >= 80 ? 'text-emerald-500 dark:text-emerald-400' : stats.percentage >= 50 ? 'text-amber-500 dark:text-amber-400' : 'text-rose-500 dark:text-rose-400'}`}>
                                  {stats.percentage}%
-                              </span>
-                              <span className="text-[10px] text-slate-400">
-                                 {stats.totalMarked > 0 ? 'Tỉ lệ' : 'Chưa ghi'}
                               </span>
                            </div>
                         </td>
@@ -532,7 +513,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
             </div>
          )}
          
-         <div className="p-3 bg-white/80 dark:bg-dark-900/80 border-t border-slate-200 dark:border-dark-700 text-xs text-center text-slate-500 backdrop-blur-sm">
+         <div className="p-3 bg-white/80 dark:bg-dark-900/80 border-t border-slate-200 dark:border-dark-700 text-[10px] md:text-xs text-center text-slate-500 backdrop-blur-sm">
             Mẹo: Nhấn vào tên học viên để làm nổi bật dòng • Nhấn vào tiêu đề ngày để điểm danh nhanh cả lớp
          </div>
       </div>

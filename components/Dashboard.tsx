@@ -5,9 +5,10 @@ import { Student, MonthlyPerformance } from '../types';
 
 interface DashboardProps {
   students: Student[];
+  isMobile?: boolean;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ students }) => {
+const Dashboard: React.FC<DashboardProps> = ({ students, isMobile = false }) => {
   // Clock State
   const [currentTime, setCurrentTime] = useState(new Date());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -77,7 +78,7 @@ const Dashboard: React.FC<DashboardProps> = ({ students }) => {
     <div 
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="relative h-full overflow-y-auto pb-20 custom-scrollbar group"
+      className={`relative h-full overflow-y-auto custom-scrollbar group ${isMobile ? 'pb-24' : 'pb-20'}`}
       style={{'--mouse-x': '50%', '--mouse-y': '50%'} as React.CSSProperties}
     >
       {/* Dynamic Background Glow - Multi-layered for depth */}
@@ -92,13 +93,14 @@ const Dashboard: React.FC<DashboardProps> = ({ students }) => {
       />
 
       {/* Content Wrapper */}
-      <div className="relative z-10 p-8 space-y-8">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-slate-200 dark:border-dark-700 pb-6 gap-4">
+      <div className={`relative z-10 space-y-8 ${isMobile ? 'p-4' : 'p-8'}`}>
+        <header className={`flex ${isMobile ? 'flex-col gap-4' : 'flex-col md:flex-row justify-between items-start md:items-end'} border-b border-slate-200 dark:border-dark-700 pb-6`}>
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">Tổng Quan</h2>
+            <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-slate-900 dark:text-white mb-1`}>Tổng Quan</h2>
             <p className="text-slate-500 dark:text-slate-400">Báo cáo hiệu suất và thống kê hệ thống</p>
           </div>
-          <div className="flex items-center gap-4 bg-white dark:bg-dark-800/50 p-3 rounded-xl border border-slate-200 dark:border-dark-700/50 backdrop-blur-sm shadow-lg">
+          <div className={`flex items-center gap-4 bg-white dark:bg-dark-800/50 p-3 rounded-xl border border-slate-200 dark:border-dark-700/50 backdrop-blur-sm shadow-lg ${isMobile ? 'w-full justify-between' : ''}`}>
+            {isMobile && <span className="text-xs font-bold uppercase text-primary">Thời gian thực</span>}
             <div className="text-right">
               <div className="flex items-center justify-end gap-2 text-primary font-bold text-xl font-mono tracking-widest">
                   <Clock className="w-5 h-5 mb-0.5" />
@@ -113,7 +115,7 @@ const Dashboard: React.FC<DashboardProps> = ({ students }) => {
         </header>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${isMobile ? 'gap-4' : ''}`}>
           <StatCard
             title="Tổng học viên"
             value={students.length}
@@ -146,10 +148,10 @@ const Dashboard: React.FC<DashboardProps> = ({ students }) => {
         </div>
 
         {/* Visual Feature: Leaderboard & Timeline */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className={`grid grid-cols-1 ${isMobile ? '' : 'xl:grid-cols-3'} gap-8`}>
           
           {/* Top Performers (Leaderboard) */}
-          <div className="xl:col-span-2 bg-white dark:bg-gradient-to-br dark:from-dark-800 dark:to-dark-900 border border-slate-200 dark:border-dark-700 rounded-2xl p-6 shadow-xl relative overflow-hidden group/card hover:border-primary/20 transition-colors">
+          <div className={`${isMobile ? '' : 'xl:col-span-2'} bg-white dark:bg-gradient-to-br dark:from-dark-800 dark:to-dark-900 border border-slate-200 dark:border-dark-700 rounded-2xl p-6 shadow-xl relative overflow-hidden group/card hover:border-primary/20 transition-colors`}>
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover/card:opacity-20 transition-opacity duration-500">
               <Trophy className="w-32 h-32 text-yellow-500" />
             </div>
@@ -158,7 +160,7 @@ const Dashboard: React.FC<DashboardProps> = ({ students }) => {
               <Crown className="w-5 h-5 text-yellow-400" /> Bảng vàng thành tích
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10 ${isMobile ? 'grid-cols-2 gap-3' : ''}`}>
               {topStudents.map((student, index) => (
                 <div key={student.id} className="bg-slate-50 dark:bg-dark-700/50 backdrop-blur-md border border-slate-200 dark:border-white/5 p-4 rounded-xl flex flex-col items-center text-center hover:shadow-lg dark:hover:bg-dark-700 hover:border-primary/30 transition-all group cursor-default">
                   <div className="relative mb-3">
@@ -216,9 +218,9 @@ const Dashboard: React.FC<DashboardProps> = ({ students }) => {
         </div>
 
         {/* Charts Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={`grid grid-cols-1 ${isMobile ? '' : 'lg:grid-cols-3'} gap-6`}>
           {/* Main Area Chart */}
-          <div className="lg:col-span-2 bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl p-6 shadow-xl hover:border-primary/20 transition-colors">
+          <div className={`${isMobile ? '' : 'lg:col-span-2'} bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl p-6 shadow-xl hover:border-primary/20 transition-colors`}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Hiệu suất Học tập</h3>
               <select className="bg-slate-100 dark:bg-dark-900 border border-slate-300 dark:border-dark-600 text-xs text-slate-700 dark:text-slate-300 rounded-lg px-2 py-1 outline-none focus:border-primary">

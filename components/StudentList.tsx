@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Plus, Download, Trash2, Edit2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, History, Clock, ArrowUpLeft, LayoutGrid, List, ArrowUpDown, Mail, AlertTriangle, CircleDollarSign } from 'lucide-react';
+import { Search, Plus, Download, Trash2, Edit2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, History, Clock, ArrowUpLeft, LayoutGrid, List, ArrowUpDown, Mail, AlertTriangle, CircleDollarSign, Filter } from 'lucide-react';
 import { Student, StudentStatus } from '../types';
 import StudentDetail from './StudentDetail';
 import AddStudentModal from './AddStudentModal';
@@ -11,12 +11,13 @@ interface StudentListProps {
   onUpdateStudent: (student: Student) => void;
   onDeleteStudent: (studentId: string) => void;
   userRole: string;
+  isMobile?: boolean; // New prop
 }
 
 type SortKey = 'name' | 'gpa' | 'attendance' | 'joinDate' | 'tuitionPaid';
 type SortDirection = 'asc' | 'desc';
 
-const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAddStudent, onUpdateStudent, onDeleteStudent, userRole }) => {
+const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAddStudent, onUpdateStudent, onDeleteStudent, userRole, isMobile = false }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -25,7 +26,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [studentToEdit, setStudentToEdit] = useState<Student | undefined>(undefined);
   
-  // View Mode State (Grid vs List)
+  // View Mode State (Grid vs List) - Default to Grid on mobile
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
   // Sorting State
@@ -49,7 +50,12 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
         console.error("Failed to parse search history");
       }
     }
-  }, []);
+    
+    // Auto-detect mobile or if isMobile prop is passed, force grid
+    if (window.innerWidth < 768 || isMobile) {
+      setViewMode('grid');
+    }
+  }, [isMobile]);
 
   const saveSearchTerm = (term: string) => {
     if (!term.trim()) return;
@@ -128,7 +134,6 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
     }
   };
 
-  // Helper to ensure dd/mm/yyyy format
   const formatDate = (dateStr: string) => {
     if (!dateStr) return 'Chưa cập nhật';
     const date = new Date(dateStr);
@@ -148,7 +153,6 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
     setIsSortMenuOpen(false);
   };
 
-  // Handlers for Add/Edit/Delete
   const handleOpenAdd = () => {
     setStudentToEdit(undefined);
     setIsModalOpen(true);
@@ -176,7 +180,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
   };
 
   const initiateDelete = (e: React.MouseEvent, student: Student) => {
-    e.stopPropagation(); // Prevent opening detail view
+    e.stopPropagation(); 
     setStudentToDelete(student);
   };
 
@@ -187,7 +191,6 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
     }
   };
 
-  // Export to Excel (CSV)
   const handleExport = () => {
     if (processedStudents.length === 0) {
       alert("Không có dữ liệu học viên để xuất.");
@@ -220,9 +223,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
       `"${student.tuitionPaid ? 'Đã đóng' : 'Chưa đóng'}"`
     ]);
 
-    // UTF-8 BOM for Excel support
     const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-    
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -235,46 +236,46 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
 
   return (
     <>
-      <div className="p-8 h-full flex flex-col animate-fade-in">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+      <div className={`p-4 ${isMobile ? 'pb-24 pt-4' : 'md:p-8 md:pb-8'} h-full flex flex-col animate-fade-in`}>
+        <div className={`flex ${isMobile ? 'flex-col gap-3' : 'flex-col md:flex-row justify-between items-start md:items-center gap-4'} mb-6`}>
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">Danh sách Học viên</h2>
-            <p className="text-slate-500 dark:text-slate-400">Quản lý thông tin và trạng thái học tập</p>
+            <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-slate-900 dark:text-white mb-1`}>Danh sách Học viên</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Quản lý thông tin và trạng thái học tập</p>
           </div>
-          <div className="flex gap-3">
+          <div className={`flex gap-2 ${isMobile ? 'w-full' : 'w-full md:w-auto'}`}>
              <button 
                onClick={handleExport}
-               className="flex items-center gap-2 px-4 py-2 bg-slate-200 dark:bg-dark-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl border border-slate-300 dark:border-dark-600 hover:bg-slate-300 dark:hover:bg-dark-600 transition-all"
+               className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-slate-200 dark:bg-dark-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl border border-slate-300 dark:border-dark-600 hover:bg-slate-300 dark:hover:bg-dark-600 transition-all text-sm"
              >
                <Download className="w-4 h-4" />
-               <span className="text-sm font-medium hidden sm:inline">Xuất Excel</span>
+               <span className="font-medium">Xuất Excel</span>
              </button>
              
              {isAdmin && (
                <button 
                  onClick={handleOpenAdd}
-                 className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-indigo-600 text-white rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95"
+                 className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-indigo-600 text-white rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95 text-sm"
                >
                  <Plus className="w-4 h-4" />
-                 <span className="text-sm font-medium">Thêm mới</span>
+                 <span className="font-medium">Thêm mới</span>
                </button>
              )}
           </div>
         </div>
 
-        {/* Filters & Controls Bar */}
-        <div className="bg-white dark:bg-dark-800 p-4 rounded-2xl border border-slate-200 dark:border-dark-700 mb-6 flex flex-wrap gap-4 items-center justify-between shadow-lg relative z-30">
-          <div className="relative flex-1 max-w-md">
+        {/* Filters & Controls Bar - UPDATED for Mobile Stacking */}
+        <div className={`bg-white dark:bg-dark-800 p-3 ${isMobile ? 'p-3 flex-col' : 'md:p-4 md:flex-row'} rounded-2xl border border-slate-200 dark:border-dark-700 mb-6 flex gap-3 items-stretch shadow-lg relative z-30`}>
+          <div className="relative w-full md:flex-1 md:max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input 
               type="text" 
-              placeholder="Tìm kiếm theo tên, email..." 
+              placeholder="Tìm kiếm..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={handleKeyDown}
               onFocus={() => setShowHistory(true)}
               onBlur={() => setTimeout(() => setShowHistory(false), 200)}
-              className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-dark-600 text-slate-800 dark:text-slate-200 pl-10 pr-4 py-2.5 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder-slate-400"
+              className="w-full bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-dark-600 text-slate-800 dark:text-slate-200 pl-10 pr-4 py-2.5 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder-slate-400 text-sm md:text-base"
             />
             
             {/* Search History Dropdown */}
@@ -307,9 +308,6 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                         <Clock className="w-4 h-4" />
                       </div>
                       <span className="font-medium flex-1 truncate">{term}</span>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0 duration-200">
-                         <ArrowUpLeft className="w-4 h-4 text-slate-400" />
-                      </div>
                     </button>
                   ))}
                 </div>
@@ -317,12 +315,12 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
             )}
           </div>
 
-          <div className="flex gap-3 items-center">
+          <div className="flex w-full md:w-auto gap-2 items-center">
             {/* Sort Dropdown */}
-            <div className="relative">
+            <div className="relative flex-1 md:flex-none">
               <button 
                 onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
-                className="flex items-center gap-2 px-3 py-2.5 bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-dark-600 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[140px] justify-between"
+                className="w-full md:w-auto flex items-center gap-2 px-3 py-2.5 bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-dark-600 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[140px] justify-between"
               >
                 <div className="flex items-center gap-2">
                   <ArrowUpDown className="w-4 h-4" />
@@ -336,7 +334,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
               {isSortMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setIsSortMenuOpen(false)}></div>
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-600 rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in">
+                  <div className="absolute right-0 top-full mt-2 w-full md:w-48 bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-600 rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in">
                     <div className="p-2 space-y-1">
                       {[
                         { key: 'name', label: 'Tên (A-Z)' },
@@ -368,23 +366,25 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
               )}
             </div>
 
-            {/* View Toggle */}
-            <div className="flex bg-slate-100 dark:bg-dark-900 p-1 rounded-xl border border-slate-200 dark:border-dark-600">
-               <button 
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-dark-800 text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
-                title="Dạng lưới"
-               >
-                 <LayoutGrid className="w-4 h-4" />
-               </button>
-               <button 
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-dark-800 text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
-                title="Dạng danh sách"
-               >
-                 <List className="w-4 h-4" />
-               </button>
-            </div>
+            {/* View Toggle - Hidden on mobile, force grid */}
+            {!isMobile && (
+              <div className="hidden md:flex bg-slate-100 dark:bg-dark-900 p-1 rounded-xl border border-slate-200 dark:border-dark-600">
+                 <button 
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-dark-800 text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                  title="Dạng lưới"
+                 >
+                   <LayoutGrid className="w-4 h-4" />
+                 </button>
+                 <button 
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-dark-800 text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                  title="Dạng danh sách"
+                 >
+                   <List className="w-4 h-4" />
+                 </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -401,14 +401,15 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
            </div>
         ) : (
           <div className="flex-1 overflow-y-auto custom-scrollbar -mx-2 px-2 pb-4">
-             {viewMode === 'grid' ? (
+             {/* Force Grid on mobile if viewMode is 'list', or just check viewMode */}
+             {(viewMode === 'grid' || isMobile) ? (
                 // GRID VIEW
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                <div className={`grid grid-cols-1 ${isMobile ? '' : 'md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'} gap-4 md:gap-6`}>
                   {currentItems.map((student) => (
                     <div 
                       key={student.id} 
                       onClick={() => setSelectedStudent(student)}
-                      className="group bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col"
+                      className="group bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl p-5 md:p-6 shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col"
                     >
                       {/* Top Accent */}
                       <div className={`absolute top-0 left-0 w-full h-1 ${student.gpa >= 8 ? 'bg-emerald-500' : student.gpa >= 5 ? 'bg-primary' : 'bg-rose-500'}`}></div>
@@ -473,7 +474,6 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                                   title="Chỉnh sửa"
                                 >
                                    <Edit2 className="w-4 h-4" />
-                                   <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-slate-800 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Chỉnh sửa</span>
                                 </button>
                                 <button 
                                   onClick={(e) => initiateDelete(e, student)}
@@ -481,7 +481,6 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                                   title="Xóa"
                                 >
                                    <Trash2 className="w-4 h-4" />
-                                   <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-slate-800 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Xóa</span>
                                 </button>
                                </>
                             ) : (
@@ -499,7 +498,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                   ))}
                 </div>
              ) : (
-                // LIST VIEW (Classic Table)
+                // LIST VIEW (Classic Table) - Only on Desktop
                 <div className="bg-white dark:bg-dark-800 rounded-2xl border border-slate-200 dark:border-dark-700 overflow-hidden shadow-sm">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
@@ -569,7 +568,6 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                               <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button onClick={() => setSelectedStudent(student)} className="p-2 text-slate-400 hover:text-primary rounded-lg transition-colors group/btn relative z-10" title="Xem chi tiết">
                                   <Eye className="w-4 h-4" />
-                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-slate-800 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Chi tiết</span>
                                 </button>
                                 {isAdmin && (
                                   <>
@@ -579,7 +577,6 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                                       title="Chỉnh sửa"
                                     >
                                       <Edit2 className="w-4 h-4" />
-                                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-slate-800 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Chỉnh sửa</span>
                                     </button>
                                     <button 
                                       onClick={(e) => initiateDelete(e, student)}
@@ -587,14 +584,20 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                                       title="Xóa"
                                     >
                                       <Trash2 className="w-4 h-4" />
-                                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-slate-800 rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Xóa</span>
                                     </button>
                                   </>
                                 )}
                               </div>
                             </td>
                           </tr>
-                        ))}
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={7} className="p-8 text-center text-slate-500">
+                             Không tìm thấy dữ liệu.
+                          </td>
+                        </tr>
+                      )}
                       </tbody>
                     </table>
                   </div>
@@ -605,8 +608,8 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
           
         {/* Pagination Footer */}
         <div className="py-4 border-t border-slate-200 dark:border-dark-700 flex flex-col sm:flex-row justify-between items-center mt-auto gap-4">
-          <span className="text-sm text-slate-500">
-            Hiển thị {currentItems.length > 0 ? indexOfFirstItem + 1 : 0} - {Math.min(indexOfLastItem, processedStudents.length)} trên tổng số {processedStudents.length} kết quả
+          <span className="text-sm text-slate-500 text-center sm:text-left">
+            {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, processedStudents.length)} / {processedStudents.length}
           </span>
           
           <div className="flex items-center gap-1">
@@ -615,44 +618,21 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
               disabled={currentPage === 1}
               className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronsLeft className="w-4 h-4" />
+              <ChevronsLeft className="w-5 h-5" />
             </button>
             <button 
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
               disabled={currentPage === 1}
               className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
             
             <div className="flex items-center gap-1 mx-2">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum = i + 1;
-                if (totalPages > 5) {
-                    if (currentPage > 3) {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    if (pageNum > totalPages) {
-                      pageNum = totalPages - 4 + i;
-                    }
-                }
-                if (pageNum > 0 && pageNum <= totalPages) {
-                    return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${
-                        currentPage === pageNum 
-                          ? 'bg-primary text-white shadow-lg shadow-primary/30' 
-                          : 'bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-700 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                }
-                return null;
-              })}
+              <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                {currentPage}
+              </span>
+              <span className="text-sm text-slate-500">/ {totalPages}</span>
             </div>
 
             <button 
@@ -660,14 +640,14 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
               disabled={currentPage === totalPages || totalPages === 0}
               className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-5 h-5" />
             </button>
             <button 
               onClick={() => setCurrentPage(totalPages)} 
               disabled={currentPage === totalPages || totalPages === 0}
               className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronsRight className="w-4 h-4" />
+              <ChevronsRight className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -706,13 +686,13 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
               <div className="flex gap-3">
                  <button 
                     onClick={() => setStudentToDelete(null)}
-                    className="flex-1 py-2.5 rounded-xl border border-dark-600 text-slate-300 hover:bg-dark-700 transition-colors font-medium"
+                    className="flex-1 py-3 rounded-xl border border-dark-600 text-slate-300 hover:bg-dark-700 transition-colors font-medium"
                  >
                     Hủy bỏ
                  </button>
                  <button 
                     onClick={confirmDelete}
-                    className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/20 transition-all font-bold"
+                    className="flex-1 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/20 transition-all font-bold"
                  >
                     Xóa
                  </button>

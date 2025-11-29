@@ -9,9 +9,10 @@ interface SettingsProps {
   onUpdateProfile: (newProfile: UserProfile) => void;
   data: { students: Student[], classes: ClassRoom[] };
   onRestore: (backupData: any) => void;
+  isMobile?: boolean; // New prop
 }
 
-const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUpdateProfile, data, onRestore }) => {
+const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUpdateProfile, data, onRestore, isMobile = false }) => {
   // System Settings State
   const [localSettings, setLocalSettings] = useState<SystemSettings>(settings);
   
@@ -164,9 +165,9 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto animate-fade-in h-full overflow-y-auto custom-scrollbar pb-24">
+    <div className={`p-8 ${isMobile ? 'pb-24' : 'max-w-5xl mx-auto pb-24'} animate-fade-in h-full overflow-y-auto custom-scrollbar`}>
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">Cấu hình Hệ thống</h2>
+        <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-slate-900 dark:text-white mb-1`}>Cấu hình Hệ thống</h2>
         <p className="text-slate-500 dark:text-slate-400">Quản lý hồ sơ, giao diện và dữ liệu</p>
       </div>
 
@@ -184,9 +185,9 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
              </div>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-8 items-start">
+          <div className={`flex ${isMobile ? 'flex-col' : 'flex-col md:flex-row'} gap-8 items-start`}>
              {/* Left: Avatar Upload */}
-             <div className="flex flex-col items-center gap-4">
+             <div className={`flex flex-col items-center gap-4 ${isMobile ? 'w-full' : ''}`}>
                 <div 
                    className="relative group cursor-pointer w-32 h-32 rounded-full overflow-hidden shadow-2xl ring-4 ring-slate-100 dark:ring-dark-700" 
                    onClick={() => !isUploadingAvatar && fileInputRef.current?.click()}
@@ -236,7 +237,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
              </div>
 
              {/* Right: Form Fields */}
-             <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+             <div className={`flex-1 grid grid-cols-1 ${isMobile ? '' : 'md:grid-cols-2'} gap-6 w-full`}>
                 <div>
                    <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-2">Họ và Tên</label>
                    <div className="relative">
@@ -261,7 +262,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
                       />
                    </div>
                 </div>
-                <div className="md:col-span-2">
+                <div className={isMobile ? '' : 'md:col-span-2'}>
                    <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-2">Email Liên hệ</label>
                    <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
@@ -277,7 +278,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className={`grid grid-cols-1 ${isMobile ? '' : 'lg:grid-cols-2'} gap-8`}>
           {/* SECTION 1: DISPLAY & PAGINATION */}
           <div className="bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl p-6 shadow-xl hover:border-primary/30 transition-colors">
             <div className="flex items-start gap-4 mb-6">
@@ -390,7 +391,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
           </div>
 
           {/* SECTION 3: BACKUP & RESTORE */}
-          <div className="lg:col-span-2 bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl p-6 shadow-xl hover:border-emerald-500/30 transition-colors relative overflow-hidden">
+          <div className={`${isMobile ? '' : 'lg:col-span-2'} bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl p-6 shadow-xl hover:border-emerald-500/30 transition-colors relative overflow-hidden`}>
             <div className="absolute top-0 right-0 p-4 opacity-5">
                <Database className="w-48 h-48 text-emerald-500" />
             </div>
@@ -405,7 +406,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+            <div className={`grid grid-cols-1 ${isMobile ? '' : 'md:grid-cols-2'} gap-8 relative z-10`}>
                {/* Backup Column */}
                <div className="bg-slate-50 dark:bg-dark-950/50 p-5 rounded-xl border border-slate-200 dark:border-dark-600 flex flex-col">
                   <h4 className="text-slate-800 dark:text-white font-semibold mb-2 flex items-center gap-2">
@@ -453,13 +454,13 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
       </div>
 
       {/* Floating Action Button - Shifted left to accommodate global feedback button */}
-      <div className="fixed bottom-6 right-24 z-20">
+      <div className={`fixed z-20 ${isMobile ? 'bottom-20 right-20' : 'bottom-6 right-24'}`}>
         <button
           onClick={handleSave}
           className="flex items-center gap-2 px-6 py-4 bg-primary hover:bg-indigo-500 text-white rounded-2xl font-bold shadow-2xl shadow-primary/40 transition-all hover:-translate-y-1 active:scale-95"
         >
           {isSaved ? <CheckCircle2 className="w-5 h-5" /> : <Save className="w-5 h-5" />}
-          {isSaved ? 'Đã lưu cài đặt!' : 'Lưu tất cả thay đổi'}
+          {isSaved ? 'Đã lưu!' : 'Lưu thay đổi'}
         </button>
       </div>
     </div>
