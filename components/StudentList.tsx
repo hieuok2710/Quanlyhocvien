@@ -590,14 +590,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                               </div>
                             </td>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={7} className="p-8 text-center text-slate-500">
-                             Không tìm thấy dữ liệu.
-                          </td>
-                        </tr>
-                      )}
+                        ))}
                       </tbody>
                     </table>
                   </div>
