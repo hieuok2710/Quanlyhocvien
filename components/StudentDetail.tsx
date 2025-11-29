@@ -1,6 +1,5 @@
-
 import React, { useState, useRef } from 'react';
-import { X, Mail, Phone, Calendar, Award, BookOpen, Clock, Star, ShieldCheck, Zap, BarChart2, Printer, User } from 'lucide-react';
+import { X, Mail, Phone, Calendar, Award, BookOpen, Clock, Star, ShieldCheck, Zap, BarChart2, Printer, User, CircleDollarSign } from 'lucide-react';
 import { Student, StudentStatus } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -133,6 +132,22 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ student, allStudents, onC
   // Logic for Badges (Visual & Non-AI Content)
   const getBadges = () => {
     const badges = [];
+    
+    // Tuition Status Badge
+    if (student.tuitionPaid) {
+      badges.push({
+        label: 'Đã đóng học phí',
+        icon: CircleDollarSign,
+        className: 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-400 border-emerald-500/30 hover:from-emerald-500/30 hover:to-teal-500/30 hover:border-emerald-400 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:ring-1 hover:ring-emerald-500/50'
+      });
+    } else {
+      badges.push({
+        label: 'Chưa đóng học phí',
+        icon: CircleDollarSign,
+        className: 'bg-gradient-to-br from-rose-500/20 to-pink-500/20 text-rose-400 border-rose-500/30 hover:from-rose-500/30 hover:to-pink-500/30 hover:border-rose-400 hover:shadow-[0_0_15px_rgba(244,63,94,0.4)] hover:ring-1 hover:ring-rose-500/50 animate-pulse'
+      });
+    }
+
     if (student.gpa >= 9.0) {
       badges.push({ 
         label: 'Xuất sắc', 

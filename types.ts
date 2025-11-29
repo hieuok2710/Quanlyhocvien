@@ -26,6 +26,7 @@ export interface Student {
   status: StudentStatus;
   gpa: number;
   attendance: number; // Percentage
+  tuitionPaid: boolean; // Payment status
   scores: SubjectScore[];
 }
 

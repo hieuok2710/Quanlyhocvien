@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, User, Mail, Phone, Calendar, BookOpen, Save, Check, Lock, Camera, Upload } from 'lucide-react';
+import { X, User, Mail, Phone, Calendar, BookOpen, Save, Check, Lock, Camera, Upload, CircleDollarSign } from 'lucide-react';
 import { Student, StudentStatus } from '../types';
 
 interface AddStudentModalProps {
@@ -17,7 +17,8 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({ onClose, onSave, init
     phone: '',
     dob: '',
     classId: initialClassId,
-    avatar: ''
+    avatar: '',
+    tuitionPaid: false
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +33,8 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({ onClose, onSave, init
         phone: initialData.phone,
         dob: initialData.dob,
         classId: initialData.classId,
-        avatar: initialData.avatar
+        avatar: initialData.avatar,
+        tuitionPaid: initialData.tuitionPaid || false
       });
     } else if (initialClassId) {
       setFormData(prev => ({ ...prev, classId: initialClassId }));
@@ -78,6 +80,7 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({ onClose, onSave, init
         status: initialData ? initialData.status : StudentStatus.ACTIVE,
         gpa: initialData ? initialData.gpa : 0,
         attendance: initialData ? initialData.attendance : 100,
+        tuitionPaid: formData.tuitionPaid,
         scores: initialData ? initialData.scores : []
       };
 
@@ -223,6 +226,31 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({ onClose, onSave, init
                 <p className="text-[10px] text-amber-500 mt-1 ml-1">* Học viên sẽ được thêm trực tiếp vào lớp này</p>
               )}
             </div>
+          </div>
+
+          {/* Tuition Status Toggle */}
+          <div className="flex items-center justify-between p-4 rounded-xl bg-dark-900/50 border border-dark-700">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${formData.tuitionPaid ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                 <CircleDollarSign className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="block text-sm font-semibold text-slate-200">Trạng thái Học phí</span>
+                <span className={`text-xs ${formData.tuitionPaid ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {formData.tuitionPaid ? 'Đã hoàn thành' : 'Chưa đóng học phí'}
+                </span>
+              </div>
+            </div>
+            
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={formData.tuitionPaid}
+                onChange={(e) => setFormData(prev => ({ ...prev, tuitionPaid: e.target.checked }))}
+                className="sr-only peer" 
+              />
+              <div className="w-11 h-6 bg-dark-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+            </label>
           </div>
 
           <div className="pt-4 flex gap-3 justify-end border-t border-dark-700 mt-2">

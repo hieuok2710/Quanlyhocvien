@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Plus, Download, Trash2, Edit2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, History, Clock, ArrowUpLeft, LayoutGrid, List, ArrowUpDown, Mail, AlertTriangle } from 'lucide-react';
+import { Search, Plus, Download, Trash2, Edit2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, History, Clock, ArrowUpLeft, LayoutGrid, List, ArrowUpDown, Mail, AlertTriangle, CircleDollarSign } from 'lucide-react';
 import { Student, StudentStatus } from '../types';
 import StudentDetail from './StudentDetail';
 import AddStudentModal from './AddStudentModal';
@@ -13,7 +13,7 @@ interface StudentListProps {
   userRole: string;
 }
 
-type SortKey = 'name' | 'gpa' | 'attendance' | 'joinDate';
+type SortKey = 'name' | 'gpa' | 'attendance' | 'joinDate' | 'tuitionPaid';
 type SortDirection = 'asc' | 'desc';
 
 const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAddStudent, onUpdateStudent, onDeleteStudent, userRole }) => {
@@ -91,6 +91,12 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
         aValue = a.name.toLowerCase();
         bValue = b.name.toLowerCase();
       }
+      
+      // Handle boolean sorting (tuitionPaid)
+      if (sortConfig.key === 'tuitionPaid') {
+        aValue = a.tuitionPaid ? 1 : 0;
+        bValue = b.tuitionPaid ? 1 : 0;
+      }
 
       if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
@@ -157,6 +163,13 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
     } else {
       onAddStudent(student);
     }
+  };
+
+  const toggleTuition = (e: React.MouseEvent, student: Student) => {
+    e.stopPropagation();
+    if (!isAdmin) return;
+    const updatedStudent = { ...student, tuitionPaid: !student.tuitionPaid };
+    onUpdateStudent(updatedStudent);
   };
 
   const initiateDelete = (e: React.MouseEvent, student: Student) => {
@@ -262,7 +275,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                 <div className="flex items-center gap-2">
                   <ArrowUpDown className="w-4 h-4" />
                   <span className="text-sm">
-                    {sortConfig.key === 'name' ? 'Tên' : sortConfig.key === 'gpa' ? 'GPA' : sortConfig.key === 'attendance' ? 'Chuyên cần' : 'Ngày tham gia'}
+                    {sortConfig.key === 'name' ? 'Tên' : sortConfig.key === 'gpa' ? 'GPA' : sortConfig.key === 'attendance' ? 'Chuyên cần' : sortConfig.key === 'tuitionPaid' ? 'Học phí' : 'Ngày tham gia'}
                   </span>
                 </div>
                 {sortConfig.direction === 'asc' ? <ArrowUpLeft className="w-3 h-3 rotate-45" /> : <ArrowUpLeft className="w-3 h-3 -rotate-135" />}
@@ -277,6 +290,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                         { key: 'name', label: 'Tên (A-Z)' },
                         { key: 'gpa', label: 'GPA (Điểm)' },
                         { key: 'attendance', label: 'Chuyên cần (%)' },
+                        { key: 'tuitionPaid', label: 'Học phí (Đã đóng)' },
                         { key: 'joinDate', label: 'Ngày tham gia' }
                       ].map(opt => (
                         <button
@@ -346,6 +360,21 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                     >
                       {/* Top Accent */}
                       <div className={`absolute top-0 left-0 w-full h-1 ${student.gpa >= 8 ? 'bg-emerald-500' : student.gpa >= 5 ? 'bg-primary' : 'bg-rose-500'}`}></div>
+                      
+                      {/* Tuition Status Indicator (Top Right) */}
+                      <div className="absolute top-3 right-3 z-10">
+                        <button 
+                          onClick={(e) => toggleTuition(e, student)}
+                          className={`p-1.5 rounded-full transition-all duration-300 ${
+                            student.tuitionPaid 
+                              ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20' 
+                              : 'bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 animate-pulse'
+                          }`}
+                          title={student.tuitionPaid ? "Đã đóng học phí" : "Chưa đóng học phí"}
+                        >
+                          <CircleDollarSign className="w-5 h-5" />
+                        </button>
+                      </div>
 
                       <div className="flex justify-between items-start mb-6">
                          <div className="relative">
@@ -354,7 +383,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                                {student.gpa}
                             </span>
                          </div>
-                         <div className="flex flex-col items-end">
+                         <div className="flex flex-col items-end pt-5">
                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${getStatusColor(student.status)}`}>
                               {student.status}
                             </span>
@@ -426,7 +455,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                         <tr className="bg-slate-50 dark:bg-dark-900/50 border-b border-slate-200 dark:border-dark-700">
                           <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Học viên</th>
                           <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Lớp học</th>
-                          <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ngày tham gia</th>
+                          <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Học phí</th>
                           <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Trạng thái</th>
                           <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">GPA</th>
                           <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">Chuyên cần</th>
@@ -450,7 +479,19 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                               </div>
                             </td>
                             <td className="p-4 text-sm text-slate-600 dark:text-slate-300 max-w-[150px] truncate">{student.classId}</td>
-                            <td className="p-4 text-sm text-slate-500 dark:text-slate-400">{formatDate(student.joinDate)}</td>
+                            <td className="p-4">
+                              <button 
+                                onClick={(e) => toggleTuition(e, student)}
+                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+                                  student.tuitionPaid 
+                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' 
+                                    : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 hover:bg-rose-500/20'
+                                }`}
+                              >
+                                <CircleDollarSign className="w-3.5 h-3.5" />
+                                {student.tuitionPaid ? 'Hoàn thành' : 'Chưa đóng'}
+                              </button>
+                            </td>
                             <td className="p-4">
                               <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(student.status)}`}>
                                 {student.status}

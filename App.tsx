@@ -36,6 +36,7 @@ const generateMockData = () => {
       status: i % 10 === 0 ? StudentStatus.DROPPED : i % 5 === 0 ? StudentStatus.INACTIVE : StudentStatus.ACTIVE,
       gpa: gpa,
       attendance: Math.floor(Math.random() * (100 - 60) + 60),
+      tuitionPaid: Math.random() > 0.3, // 70% students paid
       scores: scores
     };
   });
