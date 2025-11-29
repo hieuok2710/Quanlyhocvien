@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Check, X, Clock, Save, Search, Filter, AlertCircle, Calculator, Download, CalendarDays, CheckSquare } from 'lucide-react';
+import { Check, X, Clock, Save, Search, Filter, AlertCircle, Calculator, Download, CalendarDays, CheckSquare, CircleDollarSign } from 'lucide-react';
 import { Student, ClassRoom } from '../types';
 
 interface AttendanceManagerProps {
@@ -14,6 +14,13 @@ type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'NONE';
 interface AttendanceHistory {
   [studentId: string]: {
     [date: string]: AttendanceStatus;
+  };
+}
+
+// Data structure: { studentId: { monthString: boolean } }
+interface TuitionHistory {
+  [studentId: string]: {
+    [month: string]: boolean; // true = Paid, false = Unpaid
   };
 }
 
@@ -66,6 +73,9 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
 
   // State to store attendance matrix
   const [attendanceData, setAttendanceData] = useState<AttendanceHistory>({});
+  
+  // State to store tuition status per month
+  const [tuitionData, setTuitionData] = useState<TuitionHistory>({});
 
   // Filter students based on selected Class Name
   const filteredStudents = students.filter(student => 
@@ -73,6 +83,22 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     (student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
      student.email.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  // Initialize tuition data based on student's current global status (for demo purposes)
+  // In a real app, this would fetch from an API based on the month
+  useEffect(() => {
+    setTuitionData(prev => {
+      const newState = { ...prev };
+      filteredStudents.forEach(s => {
+        if (!newState[s.id]) newState[s.id] = {};
+        // If data for this month doesn't exist, default to the student's global status or false
+        if (newState[s.id][selectedMonth] === undefined) {
+           newState[s.id][selectedMonth] = s.tuitionPaid; 
+        }
+      });
+      return newState;
+    });
+  }, [selectedMonth, filteredStudents]);
 
   // Handle clicking a cell to cycle status
   // NONE -> PRESENT -> ABSENT -> LATE -> NONE
@@ -94,6 +120,17 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
         }
       };
     });
+  };
+
+  // Toggle Tuition Status
+  const toggleTuition = (studentId: string) => {
+    setTuitionData(prev => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        [selectedMonth]: !prev[studentId]?.[selectedMonth]
+      }
+    }));
   };
 
   // Quick Attendance: Toggle entire column
@@ -166,7 +203,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     setIsSaving(true);
     setTimeout(() => {
       setIsSaving(false);
-      alert(`Đã lưu dữ liệu điểm danh tháng ${selectedMonth} cho ${filteredStudents.length} học viên.`);
+      alert(`Đã lưu dữ liệu điểm danh và học phí tháng ${selectedMonth} cho ${filteredStudents.length} học viên.`);
     }, 1000);
   };
 
@@ -177,14 +214,17 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     }
 
     // CSV Header
-    const headers = ["Họ và tên", "Mã Học viên", ...daysInMonth.map(d => `${d.day}/${selectedMonth.split('-')[1]} (${d.label})`), "Tỉ lệ chuyên cần"];
+    const headers = ["Họ và tên", "Mã Học viên", "Trạng thái Học phí", ...daysInMonth.map(d => `${d.day}/${selectedMonth.split('-')[1]} (${d.label})`), "Tỉ lệ chuyên cần"];
     
     // CSV Rows
     const rows = filteredStudents.map(student => {
       const stats = getStudentStats(student.id);
+      const isPaid = tuitionData[student.id]?.[selectedMonth];
+      
       const studentRow = [
         `"${student.name}"`, 
-        `"${student.id}"`
+        `"${student.id}"`,
+        `"${isPaid ? 'Đã đóng' : 'Chưa đóng'}"`
       ];
 
       // Add status for each date
@@ -226,7 +266,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">Sổ Điểm Danh</h2>
-          <p className="text-slate-500 dark:text-slate-400">Quản lý chuyên cần chi tiết theo tháng</p>
+          <p className="text-slate-500 dark:text-slate-400">Quản lý chuyên cần và học phí chi tiết theo tháng</p>
         </div>
         
         {/* Actions */}
@@ -309,7 +349,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                    <X className="w-3.5 h-3.5 text-rose-400" /> Vắng
                  </div>
                  <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                   <Clock className="w-3.5 h-3.5 text-amber-400" /> Muộn
+                   <CircleDollarSign className="w-3.5 h-3.5 text-amber-400" /> Học phí
                  </div>
              </div>
          </div>
@@ -359,6 +399,13 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Thông tin học viên</span>
                     </th>
                     
+                    {/* Tuition Column */}
+                    <th className="sticky left-[250px] z-30 bg-slate-50 dark:bg-dark-900 p-2 min-w-[100px] border-b border-r border-slate-200 dark:border-dark-700 text-center shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)]">
+                      <span className="text-xs font-bold text-amber-500 uppercase tracking-wider flex items-center justify-center gap-1">
+                         <CircleDollarSign className="w-3.5 h-3.5" /> Học phí
+                      </span>
+                    </th>
+
                     {/* Days of Month Columns */}
                     {daysInMonth.map((d, index) => (
                       <th 
@@ -395,6 +442,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                   {filteredStudents.map((student) => {
                     const stats = getStudentStats(student.id);
                     const isHighlighted = highlightedStudentId === student.id;
+                    const isTuitionPaid = tuitionData[student.id]?.[selectedMonth];
 
                     return (
                       <tr 
@@ -419,6 +467,25 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                                  <p className="text-[10px] text-slate-500 truncate">{student.id}</p>
                               </div>
                            </div>
+                        </td>
+
+                        {/* Tuition Status Cell */}
+                        <td 
+                          className={`sticky left-[250px] z-10 p-2 text-center border-r border-slate-200 dark:border-dark-700 transition-colors duration-200 ${
+                            isHighlighted ? 'bg-indigo-100 dark:bg-indigo-900 border-indigo-200 dark:border-indigo-700' : 'bg-white dark:bg-dark-800'
+                          }`}
+                        >
+                           <button
+                             onClick={() => toggleTuition(student.id)}
+                             className={`w-full py-1.5 px-2 rounded-lg text-xs font-bold border transition-all active:scale-95 flex items-center justify-center gap-1 ${
+                               isTuitionPaid 
+                                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' 
+                                 : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/20'
+                             }`}
+                           >
+                             <CircleDollarSign className="w-3.5 h-3.5" />
+                             {isTuitionPaid ? 'Đã đóng' : 'Chưa đóng'}
+                           </button>
                         </td>
 
                         {/* Date Status Cells */}
