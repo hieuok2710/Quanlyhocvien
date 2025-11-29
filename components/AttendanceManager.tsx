@@ -203,10 +203,10 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
 
   const getStatusIcon = (status: AttendanceStatus) => {
     switch (status) {
-      case 'PRESENT': return <Check className="w-4 h-4 text-emerald-400" />;
-      case 'ABSENT': return <X className="w-4 h-4 text-rose-400" />;
-      case 'LATE': return <Clock className="w-4 h-4 text-amber-400" />;
-      default: return <div className="w-1.5 h-1.5 rounded-full bg-dark-700 group-hover:bg-dark-600" />;
+      case 'PRESENT': return <Check className="w-3.5 h-3.5 text-emerald-400" />;
+      case 'ABSENT': return <X className="w-3.5 h-3.5 text-rose-400" />;
+      case 'LATE': return <Clock className="w-3.5 h-3.5 text-amber-400" />;
+      default: return <div className="w-1 h-1 rounded-full bg-dark-700 group-hover:bg-dark-600" />;
     }
   };
 
@@ -397,13 +397,13 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
   };
 
   return (
-    <div className={`p-4 ${isMobile ? 'pb-24 pt-3' : 'md:p-8 md:pb-8'} h-full flex flex-col animate-fade-in overflow-hidden`}>
+    <div className={`p-4 ${isMobile ? 'pb-24 pt-3' : 'md:p-6 md:pb-6'} h-full flex flex-col animate-fade-in overflow-hidden`}>
       {/* Header Section */}
       <div className={`flex ${isMobile ? 'flex-col gap-2' : 'flex-col md:flex-row justify-between items-start md:items-center gap-4'} mb-2 shrink-0`}>
         <div className="flex justify-between items-center w-full">
           <div>
-            <h2 className={`${isMobile ? 'text-lg' : 'text-3xl'} font-bold text-slate-900 dark:text-white`}>Điểm Danh</h2>
-            {!isMobile && <p className="text-base text-slate-500 dark:text-slate-400">Quản lý chuyên cần và học phí</p>}
+            <h2 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-slate-900 dark:text-white`}>Điểm Danh</h2>
+            {!isMobile && <p className="text-sm text-slate-500 dark:text-slate-400">Quản lý chuyên cần và học phí</p>}
           </div>
           {isMobile && (
              <button 
@@ -419,10 +419,10 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
         {/* Desktop Actions */}
         {!isMobile && (
           <div className="flex gap-2">
-            <button onClick={handleExport} className="flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition-all text-xs">
+            <button onClick={handleExport} className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold shadow-lg shadow-emerald-600/30 transition-all text-xs">
                <Download className="w-3.5 h-3.5" /> Excel
             </button>
-            <button onClick={handleSave} disabled={isSaving} className="flex items-center justify-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition-all text-xs">
+            <button onClick={handleSave} disabled={isSaving} className="flex items-center justify-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg font-bold shadow-lg shadow-violet-600/30 transition-all text-xs">
                {isSaving ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : <Save className="w-3.5 h-3.5" />}
                {isSaving ? 'Đang lưu' : 'Lưu'}
             </button>
@@ -431,7 +431,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
       </div>
 
       {/* Control Bar */}
-      <div className={`bg-white dark:bg-dark-800 p-2 md:p-4 rounded-xl border border-slate-200 dark:border-dark-700 mb-2 md:mb-4 shadow-sm flex ${isMobile ? 'flex-col gap-2' : 'flex-col md:flex-row gap-4'} items-stretch md:items-center shrink-0`}>
+      <div className={`bg-white dark:bg-dark-800 p-2 md:p-3 rounded-lg border border-slate-200 dark:border-dark-700 mb-2 md:mb-3 shadow-sm flex ${isMobile ? 'flex-col gap-2' : 'flex-col md:flex-row gap-4'} items-stretch md:items-center shrink-0`}>
          {/* Class Selector */}
          <div className={`w-full ${isMobile ? '' : 'md:w-1/4'}`}>
             <div className="relative">
@@ -439,7 +439,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                <select 
                   value={selectedClass}
                   onChange={(e) => setSelectedClass(e.target.value)}
-                  className={`w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-white pl-8 pr-4 ${isMobile ? 'py-1.5 text-xs' : 'py-2.5 pl-10 text-sm'} rounded-lg focus:ring-1 focus:ring-violet-500/50 outline-none appearance-none cursor-pointer font-medium`}
+                  className={`w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-white pl-8 pr-4 ${isMobile ? 'py-1.5 text-xs' : 'py-2 pl-9 text-xs'} rounded-lg focus:ring-1 focus:ring-violet-500/50 outline-none appearance-none cursor-pointer font-medium`}
                >
                   {classes.map(cls => (
                     <option key={cls.id} value={cls.name}>{cls.name}</option>
@@ -460,7 +460,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                       type="month"
                       value={selectedMonth}
                       onChange={(e) => setSelectedMonth(e.target.value)}
-                      className={`w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-white pl-8 pr-4 ${isMobile ? 'py-1.5 text-xs' : 'py-2 pl-10 text-sm'} rounded-lg focus:ring-1 focus:ring-primary/50 outline-none cursor-pointer transition-colors font-medium`}
+                      className={`w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-white pl-8 pr-4 ${isMobile ? 'py-1.5 text-xs' : 'py-1.5 pl-9 text-xs'} rounded-lg focus:ring-1 focus:ring-primary/50 outline-none cursor-pointer transition-colors font-medium`}
                    />
                 </div>
              </div>
@@ -474,7 +474,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                       placeholder="Tìm kiếm..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className={`w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-slate-200 pl-8 pr-4 ${isMobile ? 'py-1.5 text-xs' : 'py-2.5 pl-10 text-sm'} rounded-lg focus:ring-1 focus:ring-violet-500/50 outline-none transition-all placeholder-slate-400`}
+                      className={`w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-dark-600 text-slate-900 dark:text-slate-200 pl-8 pr-4 ${isMobile ? 'py-1.5 text-xs' : 'py-2 pl-9 text-xs'} rounded-lg focus:ring-1 focus:ring-violet-500/50 outline-none transition-all placeholder-slate-400`}
                    />
                 </div>
              </div>
@@ -506,11 +506,11 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
          renderMobileDailyView()
       ) : (
          // DESKTOP/GRID VIEW (Existing Table Logic)
-         <div className="flex-1 bg-white dark:bg-dark-800 rounded-2xl border border-slate-200 dark:border-dark-700 shadow-xl overflow-hidden flex flex-col relative">
+         <div className="flex-1 bg-white dark:bg-dark-800 rounded-xl border border-slate-200 dark:border-dark-700 shadow-lg overflow-hidden flex flex-col relative">
            <style>{`
               .attendance-scroll::-webkit-scrollbar {
-                width: 10px;
-                height: 10px;
+                width: 8px;
+                height: 8px;
               }
               .attendance-scroll::-webkit-scrollbar-track {
                 background: #f1f5f9;
@@ -521,7 +521,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
               }
               .attendance-scroll::-webkit-scrollbar-thumb {
                 background-color: #cbd5e1;
-                border-radius: 5px;
+                border-radius: 4px;
                 border: 2px solid #f1f5f9;
               }
               :is(.dark) .attendance-scroll::-webkit-scrollbar-thumb {
@@ -536,13 +536,13 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                   <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-dark-900 shadow-md">
                     <tr>
                       {/* Sticky Student Column */}
-                      <th className={`sticky left-0 z-30 bg-slate-50 dark:bg-dark-900 p-4 text-left ${isMobile ? 'min-w-[120px]' : 'min-w-[140px] md:min-w-[250px]'} border-b border-r border-slate-200 dark:border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)]`}>
-                         <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Học viên</span>
+                      <th className={`sticky left-0 z-30 bg-slate-50 dark:bg-dark-900 p-2 text-left ${isMobile ? 'min-w-[120px]' : 'min-w-[140px] md:min-w-[200px]'} border-b border-r border-slate-200 dark:border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)]`}>
+                         <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Học viên</span>
                       </th>
                       
                       {/* Tuition Column */}
-                      <th className={`sticky ${isMobile ? 'left-[120px] min-w-[60px]' : 'left-[140px] md:left-[250px] min-w-[80px] md:min-w-[100px]'} z-30 bg-slate-50 dark:bg-dark-900 p-2 border-b border-r border-slate-200 dark:border-dark-700 text-center shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)]`}>
-                        <span className="text-[10px] md:text-xs font-bold text-amber-500 uppercase tracking-wider flex items-center justify-center gap-1">
+                      <th className={`sticky ${isMobile ? 'left-[120px] min-w-[60px]' : 'left-[140px] md:left-[200px] min-w-[80px] md:min-w-[90px]'} z-30 bg-slate-50 dark:bg-dark-900 p-2 border-b border-r border-slate-200 dark:border-dark-700 text-center shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)]`}>
+                        <span className="text-[10px] md:text-[10px] font-bold text-amber-500 uppercase tracking-wider flex items-center justify-center gap-1">
                            <CircleDollarSign className="w-3 h-3 md:w-3.5 md:h-3.5" /> <span className={isMobile ? 'hidden' : 'hidden md:inline'}>Học phí</span>
                         </span>
                       </th>
@@ -552,16 +552,16 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                         <th 
                           key={index}
                           onClick={() => handleQuickAttendance(d.fullDate)} 
-                          className={`p-1 min-w-[40px] border-b border-slate-200 dark:border-dark-700 bg-slate-50 dark:bg-dark-900 text-center relative group cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors ${
+                          className={`p-1 min-w-[32px] border-b border-slate-200 dark:border-dark-700 bg-slate-50 dark:bg-dark-900 text-center relative group cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors ${
                             d.isWeekend ? 'bg-amber-50/50 dark:bg-amber-900/10' : ''
                           }`}
                           title="Click để điểm danh nhanh toàn bộ lớp"
                         >
-                          <div className="flex flex-col items-center justify-center h-12 group/header">
-                             <span className={`text-[10px] font-bold uppercase tracking-wider ${d.isWeekend ? 'text-amber-600 dark:text-amber-500' : 'text-slate-500 dark:text-slate-400'}`}>
+                          <div className="flex flex-col items-center justify-center h-10 group/header">
+                             <span className={`text-[9px] font-bold uppercase tracking-wider ${d.isWeekend ? 'text-amber-600 dark:text-amber-500' : 'text-slate-500 dark:text-slate-400'}`}>
                                {d.label}
                              </span>
-                             <span className={`text-xs font-semibold ${d.isWeekend ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                             <span className={`text-[10px] font-semibold ${d.isWeekend ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'}`}>
                                {d.day}
                              </span>
                           </div>
@@ -569,8 +569,8 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                       ))}
 
                       {/* Stats Column */}
-                      <th className="p-4 min-w-[80px] border-b border-l border-slate-200 dark:border-dark-700 bg-slate-50 dark:bg-dark-900 text-center">
-                         <Calculator className="w-4 h-4 text-slate-400 mx-auto" />
+                      <th className="p-2 min-w-[60px] border-b border-l border-slate-200 dark:border-dark-700 bg-slate-50 dark:bg-dark-900 text-center">
+                         <Calculator className="w-3.5 h-3.5 text-slate-400 mx-auto" />
                       </th>
                     </tr>
                   </thead>
@@ -588,27 +588,27 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                           {/* Sticky Student Cell */}
                           <td 
                             onClick={() => setHighlightedStudentId(prev => prev === student.id ? null : student.id)}
-                            className={`sticky left-0 z-10 p-2 md:p-4 border-r border-slate-200 dark:border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)] cursor-pointer transition-colors duration-200 ${
+                            className={`sticky left-0 z-10 p-1.5 md:p-2 border-r border-slate-200 dark:border-dark-700 shadow-[4px_0_10px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_10px_rgba(0,0,0,0.3)] cursor-pointer transition-colors duration-200 ${
                               isHighlighted ? 'bg-indigo-100 dark:bg-indigo-900 border-indigo-200 dark:border-indigo-700' : 'bg-white dark:bg-dark-800'
                             }`}
                           >
-                             <div className="flex items-center gap-2 md:gap-3">
-                                <img src={student.avatar} alt={student.name} className={`w-8 h-8 md:w-9 md:h-9 rounded-full border object-cover transition-colors ${isHighlighted ? 'border-indigo-400' : 'border-slate-200 dark:border-dark-600'}`} />
+                             <div className="flex items-center gap-2 md:gap-2">
+                                <img src={student.avatar} alt={student.name} className={`w-7 h-7 md:w-8 md:h-8 rounded-full border object-cover transition-colors ${isHighlighted ? 'border-indigo-400' : 'border-slate-200 dark:border-dark-600'}`} />
                                 <div className="min-w-0">
-                                   <p className={`font-medium text-xs md:text-sm truncate transition-colors ${isMobile ? 'max-w-[70px]' : 'max-w-[90px] md:max-w-none'} ${isHighlighted ? 'text-indigo-700 dark:text-indigo-200' : 'text-slate-900 dark:text-white'}`}>{student.name}</p>
+                                   <p className={`font-medium text-[10px] md:text-xs truncate transition-colors ${isMobile ? 'max-w-[70px]' : 'max-w-[90px] md:max-w-none'} ${isHighlighted ? 'text-indigo-700 dark:text-indigo-200' : 'text-slate-900 dark:text-white'}`}>{student.name}</p>
                                 </div>
                              </div>
                           </td>
 
                           {/* Tuition Status Cell */}
                           <td 
-                            className={`sticky ${isMobile ? 'left-[120px]' : 'left-[140px] md:left-[250px]'} z-10 p-1 md:p-2 text-center border-r border-slate-200 dark:border-dark-700 transition-colors duration-200 ${
+                            className={`sticky ${isMobile ? 'left-[120px]' : 'left-[140px] md:left-[200px]'} z-10 p-1 md:p-1.5 text-center border-r border-slate-200 dark:border-dark-700 transition-colors duration-200 ${
                               isHighlighted ? 'bg-indigo-100 dark:bg-indigo-900 border-indigo-200 dark:border-indigo-700' : 'bg-white dark:bg-dark-800'
                             }`}
                           >
                              <button
                                onClick={() => toggleTuition(student.id)}
-                               className={`w-full py-1.5 px-1 md:px-2 rounded-lg text-[10px] md:text-xs font-bold border transition-all active:scale-95 flex items-center justify-center gap-1 ${
+                               className={`w-full py-1 px-1 md:px-1.5 rounded-lg text-[10px] md:text-[10px] font-bold border transition-all active:scale-95 flex items-center justify-center gap-1 ${
                                  isTuitionPaid 
                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' 
                                    : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/20'
@@ -625,11 +625,11 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                              return (
                                <td 
                                  key={index} 
-                                 className={`p-1 text-center border-r border-slate-100 dark:border-dark-700/50 ${d.isWeekend ? 'bg-amber-50/30 dark:bg-amber-900/5' : ''}`}
+                                 className={`p-0.5 text-center border-r border-slate-100 dark:border-dark-700/50 ${d.isWeekend ? 'bg-amber-50/30 dark:bg-amber-900/5' : ''}`}
                                >
                                   <button
                                      onClick={() => toggleStatus(student.id, d.fullDate)}
-                                     className={`w-full h-8 rounded flex items-center justify-center transition-all duration-200 border group active:scale-95 ${getStatusColor(status)}`}
+                                     className={`w-full h-7 rounded flex items-center justify-center transition-all duration-200 border group active:scale-95 ${getStatusColor(status)}`}
                                   >
                                      {getStatusIcon(status)}
                                   </button>
@@ -638,9 +638,9 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                           })}
 
                           {/* Stats Cell */}
-                          <td className="p-2 md:p-4 border-l border-slate-200 dark:border-dark-700 text-center">
+                          <td className="p-1 md:p-2 border-l border-slate-200 dark:border-dark-700 text-center">
                              <div className="flex flex-col items-center justify-center">
-                                <span className={`text-xs md:text-sm font-bold ${stats.percentage >= 80 ? 'text-emerald-500 dark:text-emerald-400' : stats.percentage >= 50 ? 'text-amber-500 dark:text-amber-400' : 'text-rose-500 dark:text-rose-400'}`}>
+                                <span className={`text-[10px] md:text-xs font-bold ${stats.percentage >= 80 ? 'text-emerald-500 dark:text-emerald-400' : stats.percentage >= 50 ? 'text-amber-500 dark:text-amber-400' : 'text-rose-500 dark:text-rose-400'}`}>
                                    {stats.percentage}%
                                 </span>
                              </div>
@@ -653,8 +653,8 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
               </div>
            ) : (
               <div className="flex flex-col items-center justify-center flex-1 text-slate-500">
-                 <AlertCircle className="w-12 h-12 mb-4 opacity-50" />
-                 <p>Không tìm thấy học viên nào trong lớp này.</p>
+                 <AlertCircle className="w-10 h-10 mb-3 opacity-50" />
+                 <p className="text-sm">Không tìm thấy học viên nào trong lớp này.</p>
               </div>
            )}
          </div>

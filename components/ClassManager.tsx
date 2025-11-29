@@ -100,19 +100,19 @@ const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddCla
 
   return (
     <>
-      <div className={`p-4 ${isMobile ? 'pb-24 pt-3' : 'md:p-8 md:pb-20'} h-full overflow-y-auto animate-fade-in flex flex-col custom-scrollbar`}>
-        <div className={`flex ${isMobile ? 'flex-col gap-2' : 'flex-col md:flex-row justify-between items-start md:items-center'} mb-4 shrink-0`}>
+      <div className={`p-4 ${isMobile ? 'pb-24 pt-3' : 'md:p-6 md:pb-6'} h-full overflow-y-auto animate-fade-in flex flex-col custom-scrollbar`}>
+        <div className={`flex ${isMobile ? 'flex-col gap-2' : 'flex-col md:flex-row justify-between items-start md:items-center'} mb-3 shrink-0`}>
           <div>
-            <h2 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold text-slate-900 dark:text-white mb-0.5`}>Lớp học</h2>
+            <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-slate-900 dark:text-white mb-0.5`}>Lớp học</h2>
             {!isMobile && <p className="text-sm text-slate-500 dark:text-slate-400">Danh sách các lớp đang hoạt động</p>}
           </div>
           
           {isAdmin && (
             <button 
               onClick={() => setIsAddModalOpen(true)}
-              className={`w-full md:w-auto bg-primary hover:bg-indigo-600 text-white ${isMobile ? 'px-4 py-1.5 text-sm' : 'px-5 py-2.5'} rounded-xl font-medium shadow-lg shadow-primary/25 transition-all active:scale-95 flex items-center justify-center gap-2`}
+              className={`w-full md:w-auto bg-primary hover:bg-indigo-600 text-white ${isMobile ? 'px-4 py-1.5 text-xs' : 'px-4 py-2 text-xs font-medium'} rounded-lg shadow-lg shadow-primary/25 transition-all active:scale-95 flex items-center justify-center gap-2`}
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4" />
               Tạo lớp mới
             </button>
           )}
@@ -120,33 +120,33 @@ const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddCla
 
         {/* --- SUMMARY VISUALIZATION SECTION --- */}
         {classes.length > 0 && (
-          <div className={`grid grid-cols-1 ${isMobile ? 'gap-2' : 'lg:grid-cols-3 gap-6'} mb-6 shrink-0`}>
+          <div className={`grid grid-cols-1 ${isMobile ? 'gap-2' : 'lg:grid-cols-3 gap-4'} mb-4 shrink-0`}>
             {/* Chart: Subject Distribution */}
-            <div className={`${isMobile ? '' : 'lg:col-span-2'} bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl ${isMobile ? 'p-3' : 'p-5'} shadow-sm hover:shadow-md transition-shadow`}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="p-1.5 md:p-2 bg-indigo-500/10 rounded-lg text-indigo-500">
-                  <BarChart3 className="w-4 h-4 md:w-5 md:h-5" />
+            <div className={`${isMobile ? '' : 'lg:col-span-2'} bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-xl ${isMobile ? 'p-3' : 'p-4'} shadow-sm hover:shadow-md transition-shadow`}>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1 md:p-1.5 bg-indigo-500/10 rounded-lg text-indigo-500">
+                  <BarChart3 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 </div>
-                <h3 className="font-bold text-slate-800 dark:text-white text-xs md:text-sm uppercase tracking-wide">Phân bổ theo Môn học</h3>
+                <h3 className="font-bold text-slate-800 dark:text-white text-[10px] md:text-xs uppercase tracking-wide">Phân bổ theo Môn học</h3>
               </div>
-              <div className={isMobile ? 'h-24' : 'h-32 w-full'}>
+              <div className={isMobile ? 'h-24' : 'h-24 w-full'}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={subjectDistribution} layout="vertical" margin={{ top: 0, right: 30, left: 20, bottom: 0 }}>
+                  <BarChart data={subjectDistribution} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
                      <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" opacity={0.2} />
                      <XAxis type="number" hide />
                      <YAxis 
                         dataKey="name" 
                         type="category" 
-                        width={80} 
-                        tick={{fill: '#94a3b8', fontSize: isMobile ? 10 : 11}} 
+                        width={70} 
+                        tick={{fill: '#94a3b8', fontSize: 10}} 
                         axisLine={false} 
                         tickLine={false} 
                      />
                      <Tooltip 
-                        contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
+                        contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', color: '#fff', fontSize: '10px' }}
                         cursor={{fill: 'rgba(255,255,255,0.05)'}}
                      />
-                     <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={isMobile ? 15 : 20}>
+                     <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={12}>
                         {subjectDistribution.map((entry, index) => (
                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
@@ -157,24 +157,24 @@ const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddCla
             </div>
 
             {/* Stats: Capacity Overview */}
-            <div className={`bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl ${isMobile ? 'p-3' : 'p-5'} shadow-sm hover:shadow-md transition-shadow flex flex-col justify-center`}>
-               <div className="flex items-center gap-2 mb-4 md:mb-6">
-                <div className="p-1.5 md:p-2 bg-emerald-500/10 rounded-lg text-emerald-500">
-                  <PieChart className="w-4 h-4 md:w-5 md:h-5" />
+            <div className={`bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-xl ${isMobile ? 'p-3' : 'p-4'} shadow-sm hover:shadow-md transition-shadow flex flex-col justify-center`}>
+               <div className="flex items-center gap-2 mb-3">
+                <div className="p-1 md:p-1.5 bg-emerald-500/10 rounded-lg text-emerald-500">
+                  <PieChart className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 </div>
-                <h3 className="font-bold text-slate-800 dark:text-white text-xs md:text-sm uppercase tracking-wide">Công suất sử dụng</h3>
+                <h3 className="font-bold text-slate-800 dark:text-white text-[10px] md:text-xs uppercase tracking-wide">Công suất sử dụng</h3>
               </div>
               
-              <div className="text-center mb-3 md:mb-4">
-                <div className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-black text-slate-900 dark:text-white`}>
-                  {capacityStats.percentage}<span className="text-lg text-slate-400 font-medium">%</span>
+              <div className="text-center mb-2">
+                <div className={`${isMobile ? 'text-xl' : 'text-3xl'} font-black text-slate-900 dark:text-white`}>
+                  {capacityStats.percentage}<span className="text-sm text-slate-400 font-medium">%</span>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-[10px] text-slate-500 mt-1">
                   Đã lấp đầy {capacityStats.totalAssigned} / {capacityStats.totalCapacity} chỗ
                 </p>
               </div>
 
-              <div className="w-full bg-slate-100 dark:bg-dark-900 rounded-full h-2 md:h-3 overflow-hidden">
+              <div className="w-full bg-slate-100 dark:bg-dark-900 rounded-full h-1.5 md:h-2 overflow-hidden">
                 <div 
                   className={`h-full rounded-full transition-all duration-1000 ${
                     capacityStats.percentage > 90 ? 'bg-rose-500' : 
@@ -189,19 +189,19 @@ const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddCla
         {/* -------------------------------------- */}
 
         {classes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-slate-400 border-2 border-dashed border-slate-300 dark:border-dark-700 rounded-2xl bg-slate-50 dark:bg-dark-800/50">
-             <Calendar className="w-16 h-16 mb-4 opacity-20" />
-             <p className="text-lg font-medium">Chưa có lớp học nào</p>
-             {isAdmin && <p className="text-sm opacity-60">Hãy tạo lớp học mới để bắt đầu quản lý.</p>}
+          <div className="flex flex-col items-center justify-center h-48 text-slate-400 border-2 border-dashed border-slate-300 dark:border-dark-700 rounded-xl bg-slate-50 dark:bg-dark-800/50">
+             <Calendar className="w-12 h-12 mb-3 opacity-20" />
+             <p className="text-base font-medium">Chưa có lớp học nào</p>
+             {isAdmin && <p className="text-xs opacity-60">Hãy tạo lớp học mới để bắt đầu quản lý.</p>}
           </div>
         ) : (
           <>
-            <div className={`grid grid-cols-1 ${isMobile ? 'gap-3' : 'md:grid-cols-2 xl:grid-cols-3 gap-6'} mb-6`}>
+            <div className={`grid grid-cols-1 ${isMobile ? 'gap-3' : 'md:grid-cols-2 xl:grid-cols-3 gap-4'} mb-4`}>
               {currentClasses.map((cls) => {
                 const realCount = getRealStudentCount(cls.id, cls.name);
                 return (
-                  <div key={cls.id} onClick={() => setSelectedClass(cls)} className="bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl overflow-hidden group hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 flex flex-col relative cursor-pointer">
-                    <div className={`${isMobile ? 'h-20' : 'h-32'} relative overflow-hidden`}>
+                  <div key={cls.id} onClick={() => setSelectedClass(cls)} className="bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-xl overflow-hidden group hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 flex flex-col relative cursor-pointer">
+                    <div className={`${isMobile ? 'h-20' : 'h-24'} relative overflow-hidden`}>
                       {/* Interactive Dark Overlay */}
                       <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/40 transition-colors duration-300 z-10" />
                       
@@ -235,12 +235,12 @@ const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddCla
 
                             {/* Dropdown Menu */}
                             {activeMenuId === cls.id && (
-                              <div className="absolute right-0 top-full mt-2 w-40 bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-600 rounded-xl shadow-2xl overflow-hidden animate-fade-in z-40">
+                              <div className="absolute right-0 top-full mt-2 w-32 bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-600 rounded-lg shadow-2xl overflow-hidden animate-fade-in z-40">
                                 <button 
                                   onClick={(e) => handleDeleteClick(e, cls)}
-                                  className="w-full text-left px-4 py-3 text-sm text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 flex items-center gap-2 transition-colors"
+                                  className="w-full text-left px-3 py-2 text-xs text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 flex items-center gap-2 transition-colors"
                                 >
-                                  <Trash2 className="w-4 h-4" /> Xóa lớp
+                                  <Trash2 className="w-3.5 h-3.5" /> Xóa lớp
                                 </button>
                               </div>
                             )}
@@ -248,41 +248,41 @@ const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddCla
                         </div>
                       )}
 
-                      <div className="absolute bottom-2 left-3 md:bottom-3 md:left-4 z-20">
-                        <span className="bg-primary/90 text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded shadow-sm backdrop-blur-sm">
+                      <div className="absolute bottom-2 left-3 md:bottom-2 md:left-3 z-20">
+                        <span className="bg-primary/90 text-white text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm backdrop-blur-sm">
                           {cls.subject}
                         </span>
                       </div>
                     </div>
                     
-                    <div className={`${isMobile ? 'p-2' : 'p-5'} flex-1 flex flex-col`}>
-                      <h3 className={`${isMobile ? 'text-sm' : 'text-lg'} font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-primary transition-colors line-clamp-1`} title={cls.name}>{cls.name}</h3>
-                      <p className={`text-xs md:text-sm text-slate-500 dark:text-slate-400 ${isMobile ? 'mb-1' : 'mb-4'} truncate`}>GV: {cls.teacher}</p>
+                    <div className={`${isMobile ? 'p-2' : 'p-3'} flex-1 flex flex-col`}>
+                      <h3 className={`${isMobile ? 'text-sm' : 'text-base'} font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-primary transition-colors line-clamp-1`} title={cls.name}>{cls.name}</h3>
+                      <p className={`text-[10px] md:text-xs text-slate-500 dark:text-slate-400 ${isMobile ? 'mb-1' : 'mb-3'} truncate`}>GV: {cls.teacher}</p>
                       
-                      <div className={`space-y-1 md:space-y-2 ${isMobile ? 'mb-2' : 'mb-6'}`}>
-                        <div className="flex items-center gap-2 text-xs md:text-sm text-slate-600 dark:text-slate-300">
-                          <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                      <div className={`space-y-1 md:space-y-1.5 ${isMobile ? 'mb-2' : 'mb-3'}`}>
+                        <div className="flex items-center gap-2 text-[10px] md:text-xs text-slate-600 dark:text-slate-300">
+                          <Clock className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                           <span className="truncate">{cls.schedule}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-xs md:text-sm text-slate-600 dark:text-slate-300">
-                          <Users className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                          <div className="flex-1 bg-slate-200 dark:bg-dark-700 h-1.5 md:h-2 rounded-full overflow-hidden">
+                        <div className="flex items-center gap-2 text-[10px] md:text-xs text-slate-600 dark:text-slate-300">
+                          <Users className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                          <div className="flex-1 bg-slate-200 dark:bg-dark-700 h-1 md:h-1.5 rounded-full overflow-hidden">
                             <div 
                               className="bg-emerald-500 h-full rounded-full" 
                               style={{ width: `${Math.min((realCount / cls.maxCapacity) * 100, 100)}%` }} 
                             />
                           </div>
-                          <span className="text-xs font-medium">{realCount}/{cls.maxCapacity}</span>
+                          <span className="text-[10px] font-medium">{realCount}/{cls.maxCapacity}</span>
                         </div>
                       </div>
 
-                      <div className={`mt-auto ${isMobile ? 'pt-2' : 'pt-4'} border-t border-slate-100 dark:border-dark-700 flex justify-between items-center`}>
-                        <div className="flex -space-x-1.5 md:-space-x-2">
+                      <div className={`mt-auto ${isMobile ? 'pt-2' : 'pt-2'} border-t border-slate-100 dark:border-dark-700 flex justify-between items-center`}>
+                        <div className="flex -space-x-1.5 md:-space-x-1.5">
                           {[1,2,3].map((i) => (
-                            <div key={i} className={`${isMobile ? 'w-4 h-4' : 'w-6 h-6'} rounded-full bg-slate-200 dark:bg-dark-600 border border-white dark:border-dark-800`} />
+                            <div key={i} className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} rounded-full bg-slate-200 dark:bg-dark-600 border border-white dark:border-dark-800`} />
                           ))}
                         </div>
-                        <span className="text-[10px] md:text-xs font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        <span className="text-[9px] md:text-[10px] font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                           Chi tiết <ChevronRight className="w-3 h-3" />
                         </span>
                       </div>
@@ -298,16 +298,16 @@ const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddCla
                  <button
                    onClick={() => handlePageChange(1)}
                    disabled={currentPage === 1}
-                   className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-700 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                   className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-dark-700 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                  >
-                   <ChevronsLeft className="w-4 h-4" />
+                   <ChevronsLeft className="w-3.5 h-3.5" />
                  </button>
                  <button
                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                    disabled={currentPage === 1}
-                   className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-700 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                   className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-dark-700 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                  >
-                   <ChevronLeft className="w-4 h-4" />
+                   <ChevronLeft className="w-3.5 h-3.5" />
                  </button>
                  
                  <div className="flex items-center gap-1 mx-1">
@@ -331,7 +331,7 @@ const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddCla
                          <button
                            key={pageNum}
                            onClick={() => handlePageChange(pageNum)}
-                           className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                           className={`w-6 h-6 rounded-md text-[10px] font-bold transition-all ${
                              currentPage === pageNum 
                                ? 'bg-primary text-white shadow-lg shadow-primary/30' 
                                : 'bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-600 text-slate-500 hover:bg-slate-50 dark:hover:bg-dark-700'
@@ -346,16 +346,16 @@ const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddCla
                  <button
                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                    disabled={currentPage === totalPages}
-                   className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-700 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                   className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-dark-700 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                  >
-                   <ChevronRight className="w-4 h-4" />
+                   <ChevronRight className="w-3.5 h-3.5" />
                  </button>
                  <button
                    onClick={() => handlePageChange(totalPages)}
                    disabled={currentPage === totalPages}
-                   className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-700 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                   className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-dark-700 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                  >
-                   <ChevronsRight className="w-4 h-4" />
+                   <ChevronsRight className="w-3.5 h-3.5" />
                  </button>
                </div>
             )}
@@ -384,24 +384,24 @@ const ClassManager: React.FC<ClassManagerProps> = ({ classes, students, onAddCla
       {classToDelete && (
          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
            <div className="bg-dark-800 rounded-2xl border border-dark-600 shadow-2xl p-6 max-w-sm w-full animate-slide-up">
-              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-rose-500/10 mb-6 mx-auto border border-rose-500/20">
+              <div className="flex items-center justify-center w-14 h-14 rounded-full bg-rose-500/10 mb-4 mx-auto border border-rose-500/20">
                  <AlertTriangle className="w-8 h-8 text-rose-500" />
               </div>
-              <h3 className="text-xl font-bold text-white text-center mb-2">Xóa Lớp học?</h3>
-              <p className="text-slate-400 text-center text-sm mb-6 leading-relaxed">
+              <h3 className="text-lg font-bold text-white text-center mb-2">Xóa Lớp học?</h3>
+              <p className="text-slate-400 text-center text-xs mb-6 leading-relaxed">
                  Bạn có chắc muốn xóa lớp <b>{classToDelete.name}</b>? <br/>
                  <span className="text-rose-400 font-medium">Hành động này sẽ hủy lớp của tất cả học viên trong lớp.</span>
               </p>
               <div className="flex gap-3">
                  <button 
                     onClick={() => setClassToDelete(null)}
-                    className="flex-1 py-2.5 rounded-xl border border-dark-600 text-slate-300 hover:bg-dark-700 transition-colors font-medium"
+                    className="flex-1 py-2 rounded-lg border border-dark-600 text-slate-300 hover:bg-dark-700 transition-colors font-medium text-xs"
                  >
                     Hủy bỏ
                  </button>
                  <button 
                     onClick={confirmDelete}
-                    className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/20 transition-all font-bold"
+                    className="flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/20 transition-all font-bold text-xs"
                  >
                     Xóa lớp
                  </button>

@@ -237,37 +237,37 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
 
   return (
     <>
-      <div className={`p-4 ${isMobile ? 'pb-24 pt-3' : 'md:p-8 md:pb-8'} h-full flex flex-col animate-fade-in`}>
+      <div className={`p-4 ${isMobile ? 'pb-24 pt-3' : 'md:p-6 md:pb-6'} h-full flex flex-col animate-fade-in`}>
         <div className={`flex ${isMobile ? 'flex-col gap-2' : 'flex-col md:flex-row justify-between items-start md:items-center gap-4'} mb-3`}>
           <div>
-            <h2 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold text-slate-900 dark:text-white mb-0.5`}>Học viên</h2>
+            <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-slate-900 dark:text-white mb-0.5`}>Học viên</h2>
             {!isMobile && <p className="text-sm text-slate-500 dark:text-slate-400">Quản lý thông tin và trạng thái học tập</p>}
           </div>
           <div className={`flex gap-2 ${isMobile ? 'w-full' : 'w-full md:w-auto'}`}>
              <button 
                onClick={handleExport}
-               className={`flex-1 md:flex-none flex items-center justify-center gap-2 ${isMobile ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'} bg-slate-200 dark:bg-dark-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl border border-slate-300 dark:border-dark-600 hover:bg-slate-300 dark:hover:bg-dark-600 transition-all`}
+               className={`flex-1 md:flex-none flex items-center justify-center gap-2 ${isMobile ? 'px-3 py-1.5 text-xs' : 'px-3 py-2 text-xs font-medium'} bg-slate-200 dark:bg-dark-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg border border-slate-300 dark:border-dark-600 hover:bg-slate-300 dark:hover:bg-dark-600 transition-all`}
              >
                <Download className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
-               <span className="font-medium">Excel</span>
+               <span>Excel</span>
              </button>
              
              {isAdmin && (
                <button 
                  onClick={handleOpenAdd}
-                 className={`flex-1 md:flex-none flex items-center justify-center gap-2 ${isMobile ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'} bg-primary hover:bg-indigo-600 text-white rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95`}
+                 className={`flex-1 md:flex-none flex items-center justify-center gap-2 ${isMobile ? 'px-3 py-1.5 text-xs' : 'px-3 py-2 text-xs font-medium'} bg-primary hover:bg-indigo-600 text-white rounded-lg shadow-lg shadow-primary/20 transition-all active:scale-95`}
                >
                  <Plus className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
-                 <span className="font-medium">Thêm mới</span>
+                 <span>Thêm mới</span>
                </button>
              )}
           </div>
         </div>
 
         {/* Filters & Controls Bar - UPDATED for Mobile Stacking */}
-        <div className={`bg-white dark:bg-dark-800 p-2 md:p-3 ${isMobile ? 'flex-col gap-2' : 'md:flex-row gap-3'} rounded-xl border border-slate-200 dark:border-dark-700 mb-3 flex items-stretch shadow-sm relative z-30`}>
+        <div className={`bg-white dark:bg-dark-800 p-2 md:p-2 ${isMobile ? 'flex-col gap-2' : 'md:flex-row gap-3'} rounded-lg border border-slate-200 dark:border-dark-700 mb-3 flex items-stretch shadow-sm relative z-30`}>
           <div className="relative w-full md:flex-1 md:max-w-md">
-            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 ${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
+            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 ${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} />
             <input 
               type="text" 
               placeholder="Tìm kiếm..." 
@@ -276,21 +276,21 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
               onKeyDown={handleKeyDown}
               onFocus={() => setShowHistory(true)}
               onBlur={() => setTimeout(() => setShowHistory(false), 200)}
-              className={`w-full bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-dark-600 text-slate-800 dark:text-slate-200 pl-9 pr-4 ${isMobile ? 'py-1.5 text-xs' : 'py-2.5 pl-10 text-sm'} rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder-slate-400`}
+              className={`w-full bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-dark-600 text-slate-800 dark:text-slate-200 pl-9 pr-4 ${isMobile ? 'py-1.5 text-xs' : 'py-2 pl-9 text-xs'} rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder-slate-400`}
             />
             
             {/* Search History Dropdown */}
             {showHistory && searchHistory.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-3 bg-white dark:bg-dark-800 rounded-2xl border border-slate-200 dark:border-dark-600 shadow-2xl overflow-hidden animate-fade-in z-50 ring-4 ring-slate-200/50 dark:ring-dark-900/50">
-                <div className="px-4 py-3 bg-slate-50/80 dark:bg-dark-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-dark-700 flex justify-between items-center">
+              <div className="absolute top-full left-0 right-0 mt-3 bg-white dark:bg-dark-800 rounded-lg border border-slate-200 dark:border-dark-600 shadow-2xl overflow-hidden animate-fade-in z-50 ring-4 ring-slate-200/50 dark:ring-dark-900/50">
+                <div className="px-4 py-2 bg-slate-50/80 dark:bg-dark-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-dark-700 flex justify-between items-center">
                   <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2">
                     <History className="w-3.5 h-3.5" /> Gần đây
                   </span>
                   <button 
                     onMouseDown={(e) => { e.preventDefault(); clearHistory(); }}
-                    className="text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 font-medium group/clear"
+                    className="text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 px-2 py-1 rounded transition-all flex items-center gap-1 font-medium group/clear"
                   >
-                    <Trash2 className="w-3.5 h-3.5 group-hover/clear:animate-bounce" />
+                    <Trash2 className="w-3 h-3 group-hover/clear:animate-bounce" />
                     Xóa tất cả
                   </button>
                 </div>
@@ -303,10 +303,10 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                         setSearchTerm(term);
                         setShowHistory(false);
                       }}
-                      className="w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-dark-700/50 flex items-center gap-3 transition-all group border-b border-slate-100 dark:border-dark-700/50 last:border-0"
+                      className="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-dark-700/50 flex items-center gap-3 transition-all group border-b border-slate-100 dark:border-dark-700/50 last:border-0"
                     >
-                      <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-dark-700 text-slate-400 group-hover:text-primary group-hover:bg-primary/10 transition-colors">
-                        <Clock className="w-4 h-4" />
+                      <div className="p-1 rounded bg-slate-100 dark:bg-dark-700 text-slate-400 group-hover:text-primary group-hover:bg-primary/10 transition-colors">
+                        <Clock className="w-3 h-3" />
                       </div>
                       <span className="font-medium flex-1 truncate">{term}</span>
                     </button>
@@ -321,11 +321,11 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
             <div className="relative flex-1 md:flex-none">
               <button 
                 onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
-                className={`w-full md:w-auto flex items-center gap-2 px-3 ${isMobile ? 'py-1.5' : 'py-2.5'} bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-dark-600 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[120px] justify-between`}
+                className={`w-full md:w-auto flex items-center gap-2 px-3 ${isMobile ? 'py-1.5' : 'py-2'} bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-dark-600 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors min-w-[120px] justify-between`}
               >
                 <div className="flex items-center gap-2">
                   <ArrowUpDown className="w-3.5 h-3.5" />
-                  <span className={isMobile ? 'text-xs' : 'text-sm'}>
+                  <span className={isMobile ? 'text-xs' : 'text-xs'}>
                     {sortConfig.key === 'name' ? 'Tên' : sortConfig.key === 'gpa' ? 'GPA' : sortConfig.key === 'attendance' ? 'Chuyên cần' : sortConfig.key === 'tuitionPaid' ? 'Học phí' : 'Ngày tham gia'}
                   </span>
                 </div>
@@ -335,8 +335,8 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
               {isSortMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setIsSortMenuOpen(false)}></div>
-                  <div className="absolute right-0 top-full mt-2 w-full md:w-48 bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-600 rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in">
-                    <div className="p-2 space-y-1">
+                  <div className="absolute right-0 top-full mt-2 w-full md:w-48 bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-600 rounded-lg shadow-2xl z-50 overflow-hidden animate-fade-in">
+                    <div className="p-1 space-y-0.5">
                       {[
                         { key: 'name', label: 'Tên (A-Z)' },
                         { key: 'gpa', label: 'GPA (Điểm)' },
@@ -347,7 +347,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                         <button
                           key={opt.key}
                           onClick={() => handleSort(opt.key as SortKey)}
-                          className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between transition-colors ${
+                          className={`w-full text-left px-3 py-1.5 rounded text-xs flex items-center justify-between transition-colors ${
                             sortConfig.key === opt.key 
                               ? 'bg-primary/10 text-primary font-medium' 
                               : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-dark-700'
@@ -355,7 +355,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                         >
                           {opt.label}
                           {sortConfig.key === opt.key && (
-                            <span className="text-xs bg-primary text-white px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] bg-primary text-white px-1 py-0.5 rounded">
                               {sortConfig.direction === 'asc' ? 'Tăng' : 'Giảm'}
                             </span>
                           )}
@@ -369,20 +369,20 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
 
             {/* View Toggle - Hidden on mobile, force grid */}
             {!isMobile && (
-              <div className="hidden md:flex bg-slate-100 dark:bg-dark-900 p-1 rounded-xl border border-slate-200 dark:border-dark-600">
+              <div className="hidden md:flex bg-slate-100 dark:bg-dark-900 p-1 rounded-lg border border-slate-200 dark:border-dark-600">
                  <button 
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-dark-800 text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                  className={`p-1.5 rounded transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-dark-800 text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
                   title="Dạng lưới"
                  >
-                   <LayoutGrid className="w-4 h-4" />
+                   <LayoutGrid className="w-3.5 h-3.5" />
                  </button>
                  <button 
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-dark-800 text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                  className={`p-1.5 rounded transition-all ${viewMode === 'list' ? 'bg-white dark:bg-dark-800 text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
                   title="Dạng danh sách"
                  >
-                   <List className="w-4 h-4" />
+                   <List className="w-3.5 h-3.5" />
                  </button>
               </div>
             )}
@@ -391,12 +391,12 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
 
         {/* Content Area */}
         {currentItems.length === 0 ? (
-           <div className="flex-1 flex flex-col items-center justify-center bg-white dark:bg-dark-800 rounded-2xl border border-slate-200 dark:border-dark-700 p-12 text-center shadow-sm">
-              <div className="w-20 h-20 bg-slate-100 dark:bg-dark-700 rounded-full flex items-center justify-center mb-4">
-                 <Search className="w-8 h-8 text-slate-400" />
+           <div className="flex-1 flex flex-col items-center justify-center bg-white dark:bg-dark-800 rounded-xl border border-slate-200 dark:border-dark-700 p-12 text-center shadow-sm">
+              <div className="w-16 h-16 bg-slate-100 dark:bg-dark-700 rounded-full flex items-center justify-center mb-4">
+                 <Search className="w-6 h-6 text-slate-400" />
               </div>
-              <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Không tìm thấy kết quả</h3>
-              <p className="text-slate-500 dark:text-slate-400 max-w-sm">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">Không tìm thấy kết quả</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm">
                 Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh bộ lọc của bạn.
               </p>
            </div>
@@ -404,40 +404,40 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
           <div className="flex-1 overflow-y-auto custom-scrollbar -mx-2 px-2 pb-4">
              {/* Force Grid on mobile if viewMode is 'list', or just check viewMode */}
              {(viewMode === 'grid' || isMobile) ? (
-                // GRID VIEW
-                <div className={`grid grid-cols-1 ${isMobile ? 'gap-2' : 'md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6'}`}>
+                // GRID VIEW - COMPACT
+                <div className={`grid grid-cols-1 ${isMobile ? 'gap-2' : 'md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 md:gap-4'}`}>
                   {currentItems.map((student) => (
                     <div 
                       key={student.id} 
                       onClick={() => setSelectedStudent(student)}
-                      className={`group bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl ${isMobile ? 'p-3' : 'p-5 md:p-6'} shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col`}
+                      className={`group bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-xl ${isMobile ? 'p-3' : 'p-4'} shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col`}
                     >
                       {/* Top Accent */}
                       <div className={`absolute top-0 left-0 w-full h-1 ${student.gpa >= 8 ? 'bg-emerald-500' : student.gpa >= 5 ? 'bg-primary' : 'bg-rose-500'}`}></div>
                       
                       {/* Tuition Status Indicator (Top Right) */}
-                      <div className={`absolute ${isMobile ? 'top-2 right-2' : 'top-3 right-3'} z-10`}>
+                      <div className={`absolute ${isMobile ? 'top-2 right-2' : 'top-2 right-2'} z-10`}>
                         <button 
                           onClick={(e) => toggleTuition(e, student)}
-                          className={`p-1.5 rounded-full transition-all duration-300 ${
+                          className={`p-1 rounded-full transition-all duration-300 ${
                             student.tuitionPaid 
                               ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20' 
                               : 'bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 animate-pulse'
                           }`}
                           title={student.tuitionPaid ? "Đã đóng học phí" : "Chưa đóng học phí"}
                         >
-                          <CircleDollarSign className={isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} />
+                          <CircleDollarSign className={isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
                         </button>
                       </div>
 
-                      <div className={`flex justify-between items-start ${isMobile ? 'mb-2' : 'mb-6'}`}>
+                      <div className={`flex justify-between items-start ${isMobile ? 'mb-2' : 'mb-3'}`}>
                          <div className="relative">
-                            <img src={student.avatar} alt={student.name} className={`${isMobile ? 'w-10 h-10' : 'w-16 h-16'} rounded-full border-2 border-slate-100 dark:border-dark-600 object-cover group-hover:scale-105 transition-transform`} />
-                            <span className={`absolute -bottom-1 -right-1 ${isMobile ? 'w-4 h-4 text-[9px]' : 'w-5 h-5 text-[10px]'} rounded-full border-2 border-white dark:border-dark-800 flex items-center justify-center font-bold text-white ${student.gpa >= 5 ? 'bg-emerald-500' : 'bg-rose-500'}`}>
+                            <img src={student.avatar} alt={student.name} className={`${isMobile ? 'w-10 h-10' : 'w-12 h-12'} rounded-full border-2 border-slate-100 dark:border-dark-600 object-cover group-hover:scale-105 transition-transform`} />
+                            <span className={`absolute -bottom-1 -right-1 ${isMobile ? 'w-4 h-4 text-[9px]' : 'w-4 h-4 text-[9px]'} rounded-full border-2 border-white dark:border-dark-800 flex items-center justify-center font-bold text-white ${student.gpa >= 5 ? 'bg-emerald-500' : 'bg-rose-500'}`}>
                                {student.gpa}
                             </span>
                          </div>
-                         <div className={`flex flex-col items-end ${isMobile ? 'pt-2' : 'pt-5'}`}>
+                         <div className={`flex flex-col items-end ${isMobile ? 'pt-2' : 'pt-2'}`}>
                             <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide border ${getStatusColor(student.status)}`}>
                               {student.status}
                             </span>
@@ -446,51 +446,51 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                       </div>
 
                       <div className="mb-2 flex-1">
-                         <h3 className={`font-bold ${isMobile ? 'text-sm' : 'text-lg'} text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1`} title={student.name}>{student.name}</h3>
-                         <div className={`flex items-center gap-2 ${isMobile ? 'text-[10px]' : 'text-sm'} text-slate-500 dark:text-slate-400 mt-0.5 mb-2`}>
+                         <h3 className={`font-bold ${isMobile ? 'text-sm' : 'text-base'} text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1`} title={student.name}>{student.name}</h3>
+                         <div className={`flex items-center gap-2 ${isMobile ? 'text-[10px]' : 'text-xs'} text-slate-500 dark:text-slate-400 mt-0.5 mb-2`}>
                             <Mail className="w-3 h-3" /> <span className="truncate">{student.email}</span>
                          </div>
-                         <div className={`bg-slate-50 dark:bg-dark-900/50 rounded-lg ${isMobile ? 'p-2' : 'p-3'} border border-slate-100 dark:border-dark-700/50`}>
-                            <div className="flex items-center justify-between text-xs mb-1">
+                         <div className={`bg-slate-50 dark:bg-dark-900/50 rounded-lg ${isMobile ? 'p-2' : 'p-2'} border border-slate-100 dark:border-dark-700/50`}>
+                            <div className="flex items-center justify-between text-[10px] md:text-xs mb-1">
                                <span className="text-slate-500">Lớp học</span>
                                <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[120px]" title={student.classId}>{student.classId || 'Chưa phân lớp'}</span>
                             </div>
-                            <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center justify-between text-[10px] md:text-xs">
                                <span className="text-slate-500">Chuyên cần</span>
                                <span className={`font-bold ${student.attendance >= 90 ? 'text-emerald-500' : 'text-amber-500'}`}>{student.attendance}%</span>
                             </div>
-                            <div className={`w-full bg-slate-200 dark:bg-dark-700 ${isMobile ? 'h-1' : 'h-1.5'} rounded-full mt-2 overflow-hidden`}>
+                            <div className={`w-full bg-slate-200 dark:bg-dark-700 ${isMobile ? 'h-1' : 'h-1'} rounded-full mt-2 overflow-hidden`}>
                                <div className={`h-full rounded-full ${student.attendance >= 90 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${student.attendance}%` }} />
                             </div>
                          </div>
                       </div>
 
-                      <div className={`pt-2 border-t border-slate-100 dark:border-dark-700 flex justify-between items-center mt-auto ${isMobile ? 'pt-2' : 'pt-4'}`} onClick={(e) => e.stopPropagation()}>
+                      <div className={`pt-2 border-t border-slate-100 dark:border-dark-700 flex justify-between items-center mt-auto ${isMobile ? 'pt-2' : 'pt-2'}`} onClick={(e) => e.stopPropagation()}>
                          <div className="flex gap-2">
                             {isAdmin ? (
                                <>
                                 <button 
                                   onClick={(e) => handleOpenEdit(e, student)}
-                                  className={`text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors group/btn relative z-10 ${isMobile ? 'p-1.5' : 'p-2'}`} 
+                                  className={`text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors group/btn relative z-10 ${isMobile ? 'p-1.5' : 'p-1.5'}`} 
                                   title="Chỉnh sửa"
                                 >
                                    <Edit2 className="w-3.5 h-3.5" />
                                 </button>
                                 <button 
                                   onClick={(e) => initiateDelete(e, student)}
-                                  className={`text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors group/btn relative z-10 ${isMobile ? 'p-1.5' : 'p-2'}`} 
+                                  className={`text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors group/btn relative z-10 ${isMobile ? 'p-1.5' : 'p-1.5'}`} 
                                   title="Xóa"
                                 >
                                    <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                                </>
                             ) : (
-                               <span className="text-xs text-slate-400 italic">Chỉ xem</span>
+                               <span className="text-[10px] text-slate-400 italic">Chỉ xem</span>
                             )}
                          </div>
                          <button 
                             onClick={() => setSelectedStudent(student)}
-                            className="text-[10px] md:text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all"
+                            className="text-[10px] font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all"
                          >
                             Chi tiết <ChevronRight className="w-3 h-3" />
                          </button>
@@ -499,19 +499,19 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                   ))}
                 </div>
              ) : (
-                // LIST VIEW (Classic Table) - Only on Desktop
-                <div className="bg-white dark:bg-dark-800 rounded-2xl border border-slate-200 dark:border-dark-700 overflow-hidden shadow-sm">
+                // LIST VIEW (Classic Table) - COMPACT
+                <div className="bg-white dark:bg-dark-800 rounded-xl border border-slate-200 dark:border-dark-700 overflow-hidden shadow-sm">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-slate-50 dark:bg-dark-900/50 border-b border-slate-200 dark:border-dark-700">
-                          <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Học viên</th>
-                          <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Lớp học</th>
-                          <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Học phí</th>
-                          <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Trạng thái</th>
-                          <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">GPA</th>
-                          <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">Chuyên cần</th>
-                          <th className="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Hành động</th>
+                          <th className="p-2.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Học viên</th>
+                          <th className="p-2.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Lớp học</th>
+                          <th className="p-2.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Học phí</th>
+                          <th className="p-2.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Trạng thái</th>
+                          <th className="p-2.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">GPA</th>
+                          <th className="p-2.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">Chuyên cần</th>
+                          <th className="p-2.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Hành động</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-dark-700">
@@ -521,70 +521,70 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                             onClick={() => setSelectedStudent(student)}
                             className="group cursor-pointer hover:bg-slate-50 dark:hover:bg-dark-700/80 transition-all duration-300"
                           >
-                            <td className="p-4">
+                            <td className="p-2.5">
                               <div className="flex items-center gap-3">
-                                <img src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full border border-slate-200 dark:border-dark-600 object-cover group-hover:scale-105 transition-transform" />
+                                <img src={student.avatar} alt={student.name} className="w-8 h-8 rounded-full border border-slate-200 dark:border-dark-600 object-cover group-hover:scale-105 transition-transform" />
                                 <div>
-                                  <p className="font-medium text-slate-800 dark:text-white group-hover:text-primary transition-colors">{student.name}</p>
-                                  <p className="text-xs text-slate-500">{student.email}</p>
+                                  <p className="font-medium text-xs text-slate-800 dark:text-white group-hover:text-primary transition-colors">{student.name}</p>
+                                  <p className="text-[10px] text-slate-500">{student.email}</p>
                                 </div>
                               </div>
                             </td>
-                            <td className="p-4 text-sm text-slate-600 dark:text-slate-300 max-w-[150px] truncate">{student.classId || 'Chưa phân lớp'}</td>
-                            <td className="p-4">
+                            <td className="p-2.5 text-xs text-slate-600 dark:text-slate-300 max-w-[150px] truncate">{student.classId || 'Chưa phân lớp'}</td>
+                            <td className="p-2.5">
                               <button 
                                 onClick={(e) => toggleTuition(e, student)}
-                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+                                className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-medium border transition-all ${
                                   student.tuitionPaid 
                                     ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' 
                                     : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 hover:bg-rose-500/20'
                                 }`}
                               >
-                                <CircleDollarSign className="w-3.5 h-3.5" />
+                                <CircleDollarSign className="w-3 h-3" />
                                 {student.tuitionPaid ? 'Hoàn thành' : 'Chưa đóng'}
                               </button>
                             </td>
-                            <td className="p-4">
-                              <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(student.status)}`}>
+                            <td className="p-2.5">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${getStatusColor(student.status)}`}>
                                 {student.status}
                               </span>
                             </td>
-                            <td className="p-4 text-center">
-                              <span className={`font-bold ${student.gpa >= 8 ? 'text-emerald-500 dark:text-emerald-400' : student.gpa >= 5 ? 'text-slate-700 dark:text-slate-200' : 'text-rose-500 dark:text-rose-400'}`}>
+                            <td className="p-2.5 text-center">
+                              <span className={`font-bold text-xs ${student.gpa >= 8 ? 'text-emerald-500 dark:text-emerald-400' : student.gpa >= 5 ? 'text-slate-700 dark:text-slate-200' : 'text-rose-500 dark:text-rose-400'}`}>
                                 {student.gpa}
                               </span>
                             </td>
-                            <td className="p-4">
+                            <td className="p-2.5">
                               <div className="flex items-center justify-center gap-2">
-                                <div className="w-16 h-1.5 bg-slate-200 dark:bg-dark-900 rounded-full overflow-hidden">
+                                <div className="w-16 h-1 bg-slate-200 dark:bg-dark-900 rounded-full overflow-hidden">
                                   <div 
                                     className={`h-full rounded-full ${student.attendance >= 80 ? 'bg-emerald-500' : 'bg-amber-500'}`} 
                                     style={{ width: `${student.attendance}%` }}
                                   />
                                 </div>
-                                <span className="text-xs text-slate-500 dark:text-slate-400 w-8">{student.attendance}%</span>
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 w-6">{student.attendance}%</span>
                               </div>
                             </td>
-                            <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
-                              <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => setSelectedStudent(student)} className="p-2 text-slate-400 hover:text-primary rounded-lg transition-colors group/btn relative z-10" title="Xem chi tiết">
-                                  <Eye className="w-4 h-4" />
+                            <td className="p-2.5 text-right" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => setSelectedStudent(student)} className="p-1.5 text-slate-400 hover:text-primary rounded-lg transition-colors group/btn relative z-10" title="Xem chi tiết">
+                                  <Eye className="w-3.5 h-3.5" />
                                 </button>
                                 {isAdmin && (
                                   <>
                                     <button 
                                       onClick={(e) => handleOpenEdit(e, student)}
-                                      className="p-2 text-slate-400 hover:text-amber-500 rounded-lg transition-colors group/btn relative z-10" 
+                                      className="p-1.5 text-slate-400 hover:text-amber-500 rounded-lg transition-colors group/btn relative z-10" 
                                       title="Chỉnh sửa"
                                     >
-                                      <Edit2 className="w-4 h-4" />
+                                      <Edit2 className="w-3.5 h-3.5" />
                                     </button>
                                     <button 
                                       onClick={(e) => initiateDelete(e, student)}
-                                      className="p-2 text-slate-400 hover:text-rose-500 rounded-lg transition-colors group/btn relative z-10" 
+                                      className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors group/btn relative z-10" 
                                       title="Xóa"
                                     >
-                                      <Trash2 className="w-4 h-4" />
+                                      <Trash2 className="w-3.5 h-3.5" />
                                     </button>
                                   </>
                                 )}
@@ -601,8 +601,8 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
         )}
           
         {/* Pagination Footer */}
-        <div className="py-2 md:py-4 border-t border-slate-200 dark:border-dark-700 flex flex-col sm:flex-row justify-between items-center mt-auto gap-2">
-          <span className="text-[10px] md:text-xs text-slate-500 text-center sm:text-left">
+        <div className="py-2 border-t border-slate-200 dark:border-dark-700 flex flex-col sm:flex-row justify-between items-center mt-auto gap-2">
+          <span className="text-[10px] text-slate-500 text-center sm:text-left">
             {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, processedStudents.length)} / {processedStudents.length}
           </span>
           
@@ -610,16 +610,16 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
             <button 
               onClick={() => setCurrentPage(1)} 
               disabled={currentPage === 1}
-              className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronsLeft className="w-4 h-4" />
+              <ChevronsLeft className="w-3.5 h-3.5" />
             </button>
             <button 
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
               disabled={currentPage === 1}
-              className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3.5 h-3.5" />
             </button>
             
             <div className="flex items-center gap-1 mx-2">
@@ -632,16 +632,16 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
             <button 
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
               disabled={currentPage === totalPages || totalPages === 0}
-              className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
             <button 
               onClick={() => setCurrentPage(totalPages)} 
               disabled={currentPage === totalPages || totalPages === 0}
-              className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-dark-700 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronsRight className="w-4 h-4" />
+              <ChevronsRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -669,24 +669,24 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
       {studentToDelete && (
          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
            <div className="bg-dark-800 rounded-2xl border border-dark-600 shadow-2xl p-6 max-w-sm w-full animate-slide-up">
-              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-rose-500/10 mb-6 mx-auto border border-rose-500/20">
+              <div className="flex items-center justify-center w-14 h-14 rounded-full bg-rose-500/10 mb-4 mx-auto border border-rose-500/20">
                  <AlertTriangle className="w-8 h-8 text-rose-500" />
               </div>
-              <h3 className="text-xl font-bold text-white text-center mb-2">Xóa Học viên?</h3>
-              <p className="text-slate-400 text-center text-sm mb-6 leading-relaxed">
+              <h3 className="text-lg font-bold text-white text-center mb-2">Xóa Học viên?</h3>
+              <p className="text-slate-400 text-center text-xs mb-6 leading-relaxed">
                  Bạn có chắc muốn xóa học viên <b>{studentToDelete.name}</b>? <br/>
                  <span className="text-rose-400 font-medium">Hành động này không thể hoàn tác.</span>
               </p>
               <div className="flex gap-3">
                  <button 
                     onClick={() => setStudentToDelete(null)}
-                    className="flex-1 py-3 rounded-xl border border-dark-600 text-slate-300 hover:bg-dark-700 transition-colors font-medium"
+                    className="flex-1 py-2 rounded-lg border border-dark-600 text-slate-300 hover:bg-dark-700 transition-colors font-medium text-xs"
                  >
                     Hủy bỏ
                  </button>
                  <button 
                     onClick={confirmDelete}
-                    className="flex-1 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/20 transition-all font-bold"
+                    className="flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/20 transition-all font-bold text-xs"
                  >
                     Xóa
                  </button>
