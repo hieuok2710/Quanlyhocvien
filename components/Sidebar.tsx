@@ -6,9 +6,10 @@ interface SidebarProps {
   currentView: ViewState;
   onChangeView: (view: ViewState) => void;
   userProfile: UserProfile;
+  isMobile?: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, userProfile }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, userProfile, isMobile = false }) => {
   
   // Define distinct color themes for each menu item
   const menuConfig: Record<string, { 
@@ -57,12 +58,49 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, userProfil
 
   const menuItems = [
     { id: 'DASHBOARD', label: 'Thống kê', icon: LayoutDashboard },
-    { id: 'CLASSES', label: 'Quản lý Lớp', icon: BookOpen },
+    { id: 'CLASSES', label: 'Lớp học', icon: BookOpen },
     { id: 'STUDENTS', label: 'Học viên', icon: Users },
     { id: 'ATTENDANCE', label: 'Điểm danh', icon: ClipboardCheck },
     { id: 'SETTINGS', label: 'Cấu hình', icon: Settings },
   ];
 
+  // MOBILE BOTTOM NAVIGATION
+  if (isMobile) {
+    return (
+      <div className="bg-white dark:bg-dark-900 border-t border-slate-200 dark:border-dark-700 px-4 pb-4 pt-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-30 shrink-0">
+        <div className="flex justify-between items-end">
+           {menuItems.map((item) => {
+             const Icon = item.icon;
+             const isActive = currentView === item.id;
+             const theme = menuConfig[item.id];
+             
+             return (
+               <button
+                 key={item.id}
+                 onClick={() => onChangeView(item.id as ViewState)}
+                 className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 relative ${isActive ? '-translate-y-2' : ''}`}
+               >
+                 <div className={`p-2 rounded-xl transition-all ${
+                    isActive 
+                      ? `${theme.activeBg} ${theme.color} shadow-lg ${theme.activeShadow} ring-1 ${theme.activeBorder}` 
+                      : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-dark-800'
+                 }`}>
+                    <Icon className="w-5 h-5" />
+                 </div>
+                 <span className={`text-[10px] font-bold tracking-wide transition-colors ${
+                    isActive ? theme.color : 'text-slate-400 dark:text-slate-500'
+                 }`}>
+                   {item.label}
+                 </span>
+               </button>
+             );
+           })}
+        </div>
+      </div>
+    );
+  }
+
+  // DESKTOP SIDEBAR
   return (
     <div className="h-screen w-72 bg-white dark:bg-[#0B1121] flex flex-col shadow-2xl z-20 relative overflow-hidden border-r border-slate-200 dark:border-white/5 transition-colors duration-300">
       {/* Background Ambient Glows */}
