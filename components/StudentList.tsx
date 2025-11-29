@@ -130,7 +130,10 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
 
   // Helper to ensure dd/mm/yyyy format
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('vi-VN', {
+    if (!dateStr) return 'Chưa cập nhật';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'Ngày không hợp lệ';
+    return date.toLocaleDateString('vi-VN', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
@@ -448,7 +451,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                          <div className="bg-slate-50 dark:bg-dark-900/50 rounded-xl p-3 border border-slate-100 dark:border-dark-700/50">
                             <div className="flex items-center justify-between text-xs mb-1.5">
                                <span className="text-slate-500">Lớp học</span>
-                               <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[120px]" title={student.classId}>{student.classId}</span>
+                               <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[120px]" title={student.classId}>{student.classId || 'Chưa phân lớp'}</span>
                             </div>
                             <div className="flex items-center justify-between text-xs">
                                <span className="text-slate-500">Chuyên cần</span>
@@ -527,7 +530,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                                 </div>
                               </div>
                             </td>
-                            <td className="p-4 text-sm text-slate-600 dark:text-slate-300 max-w-[150px] truncate">{student.classId}</td>
+                            <td className="p-4 text-sm text-slate-600 dark:text-slate-300 max-w-[150px] truncate">{student.classId || 'Chưa phân lớp'}</td>
                             <td className="p-4">
                               <button 
                                 onClick={(e) => toggleTuition(e, student)}

@@ -122,7 +122,10 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ student, allStudents, onC
 
   // Helper to ensure dd/mm/yyyy format
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('vi-VN', {
+    if (!dateStr) return 'Chưa cập nhật';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'Ngày không hợp lệ';
+    return date.toLocaleDateString('vi-VN', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
@@ -287,7 +290,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ student, allStudents, onC
               </div>
               <div className="mt-3 text-center md:text-left">
                 <h2 className="text-2xl font-bold text-white">{student.name}</h2>
-                <p className="text-primary font-medium">{student.classId}</p>
+                <p className="text-primary font-medium">{student.classId || 'Chưa phân lớp'}</p>
               </div>
             </div>
 
@@ -345,7 +348,7 @@ const StudentDetail: React.FC<StudentDetailProps> = ({ student, allStudents, onC
                    </div>
                    <div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Email</p>
-                      <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">{student.email}</p>
+                      <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">{student.email || 'Chưa cập nhật'}</p>
                    </div>
                 </div>
 

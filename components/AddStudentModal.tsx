@@ -138,7 +138,7 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({ onClose, onSave, init
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Họ và Tên</label>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Họ và Tên <span className="text-rose-500">*</span></label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input 
@@ -160,7 +160,6 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({ onClose, onSave, init
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input 
                   name="email"
-                  required
                   type="email" 
                   value={formData.email}
                   onChange={handleChange}
@@ -170,7 +169,7 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({ onClose, onSave, init
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Số điện thoại</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Số điện thoại <span className="text-rose-500">*</span></label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input 
@@ -193,7 +192,6 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({ onClose, onSave, init
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input 
                   name="dob"
-                  required
                   type="date" 
                   value={formData.dob}
                   onChange={handleChange}
@@ -211,7 +209,6 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({ onClose, onSave, init
                 )}
                 <input 
                   name="classId"
-                  required
                   type="text" 
                   value={formData.classId}
                   onChange={handleChange}
