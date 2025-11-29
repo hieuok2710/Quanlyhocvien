@@ -9,33 +9,23 @@ interface SettingsProps {
   onUpdateProfile: (newProfile: UserProfile) => void;
   data: { students: Student[], classes: ClassRoom[] };
   onRestore: (backupData: any) => void;
-  isMobile?: boolean; // New prop
 }
 
-const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUpdateProfile, data, onRestore, isMobile = false }) => {
-  // System Settings State
+const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUpdateProfile, data, onRestore }) => {
   const [localSettings, setLocalSettings] = useState<SystemSettings>(settings);
-  
-  // Profile Settings State
   const [localProfile, setLocalProfile] = useState<UserProfile>(userProfile);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isSaved, setIsSaved] = useState(false);
-  
-  // Backup States
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
-  
-  // Avatar State
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
-  // Handlers for System Settings
   const handleChange = (key: keyof SystemSettings, value: any) => {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
     setIsSaved(false);
   };
 
-  // Handlers for Profile Settings
   const handleProfileChange = (key: keyof UserProfile, value: any) => {
     setLocalProfile(prev => ({ ...prev, [key]: value }));
     setIsSaved(false);
@@ -45,8 +35,6 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
     const file = e.target.files?.[0];
     if (file) {
       setIsUploadingAvatar(true);
-      
-      // Simulate network upload delay for visual feedback
       setTimeout(() => {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -60,7 +48,6 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
 
   const handleRemoveAvatar = () => {
     if (window.confirm('Bạn có chắc muốn xóa ảnh đại diện hiện tại?')) {
-       // Generate default avatar based on name
        const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(localProfile.name)}&background=6366f1&color=fff&bold=true`;
        handleProfileChange('avatar', defaultAvatar);
     }
@@ -75,8 +62,6 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
 
   const handleBackup = () => {
     setIsBackingUp(true);
-    
-    // Create a backup object containing current state including DATA
     const backupData = {
         settings: localSettings,
         profile: localProfile,
@@ -86,25 +71,23 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
         systemVersion: "1.0.0"
     };
 
-    // Simulate processing delay then download
     setTimeout(() => {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchorNode = document.createElement('a');
       downloadAnchorNode.setAttribute("href", dataStr);
       downloadAnchorNode.setAttribute("download", `edunova_backup_${new Date().toISOString().split('T')[0]}.json`);
-      document.body.appendChild(downloadAnchorNode); // required for firefox
+      document.body.appendChild(downloadAnchorNode); 
       downloadAnchorNode.click();
       downloadAnchorNode.remove();
 
       setIsBackingUp(false);
       
-      // Update last backup date
       const now = new Date();
       const dateStr = now.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
       
       const newSettings = { ...localSettings, lastBackupDate: dateStr };
       setLocalSettings(newSettings);
-      onSave(newSettings); // Save immediately to global state
+      onSave(newSettings); 
     }, 1500);
   };
 
@@ -118,23 +101,18 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
     reader.onload = (event) => {
       try {
         let jsonContent = event.target?.result as string;
-        
-        // Remove Byte Order Mark (BOM) if present to prevent parse error
         if (jsonContent.charCodeAt(0) === 0xFEFF) {
             jsonContent = jsonContent.slice(1);
         }
 
         const parsedData = JSON.parse(jsonContent);
         
-        // Basic validation
         if (!parsedData.systemVersion) {
            console.warn("Missing version info in backup file, proceeding anyway.");
         }
 
-        // Call restore handler from App
         onRestore(parsedData);
         
-        // Update local state to reflect changes immediately
         if (parsedData.settings) setLocalSettings(parsedData.settings);
         if (parsedData.profile) setLocalProfile(parsedData.profile);
 
@@ -151,7 +129,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
         alert('Lỗi: File sao lưu không hợp lệ hoặc bị hỏng. Vui lòng kiểm tra lại file JSON.');
         setIsRestoring(false);
       } finally {
-         e.target.value = ''; // Reset input to allow selecting same file again
+         e.target.value = ''; 
       }
     };
     
@@ -165,9 +143,9 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
   };
 
   return (
-    <div className={`p-8 ${isMobile ? 'pb-24' : 'max-w-5xl mx-auto pb-24'} animate-fade-in h-full overflow-y-auto custom-scrollbar`}>
+    <div className="p-8 max-w-5xl mx-auto pb-24 animate-fade-in h-full overflow-y-auto custom-scrollbar">
       <div className="mb-8">
-        <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-slate-900 dark:text-white mb-1`}>Cấu hình Hệ thống</h2>
+        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">Cấu hình Hệ thống</h2>
         <p className="text-slate-500 dark:text-slate-400">Quản lý hồ sơ, giao diện và dữ liệu</p>
       </div>
 
@@ -185,9 +163,9 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
              </div>
           </div>
 
-          <div className={`flex ${isMobile ? 'flex-col' : 'flex-col md:flex-row'} gap-8 items-start`}>
+          <div className="flex flex-col md:flex-row gap-8 items-start">
              {/* Left: Avatar Upload */}
-             <div className={`flex flex-col items-center gap-4 ${isMobile ? 'w-full' : ''}`}>
+             <div className="flex flex-col items-center gap-4">
                 <div 
                    className="relative group cursor-pointer w-32 h-32 rounded-full overflow-hidden shadow-2xl ring-4 ring-slate-100 dark:ring-dark-700" 
                    onClick={() => !isUploadingAvatar && fileInputRef.current?.click()}
@@ -198,7 +176,6 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
                       className={`w-full h-full object-cover transition-all duration-300 ${isUploadingAvatar ? 'opacity-50 blur-sm scale-105' : 'group-hover:opacity-80'}`}
                    />
                    
-                   {/* Hover Overlay */}
                    <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-300 ${isUploadingAvatar ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                       {isUploadingAvatar ? (
                          <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -237,7 +214,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
              </div>
 
              {/* Right: Form Fields */}
-             <div className={`flex-1 grid grid-cols-1 ${isMobile ? '' : 'md:grid-cols-2'} gap-6 w-full`}>
+             <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                 <div>
                    <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-2">Họ và Tên</label>
                    <div className="relative">
@@ -262,7 +239,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
                       />
                    </div>
                 </div>
-                <div className={isMobile ? '' : 'md:col-span-2'}>
+                <div className="md:col-span-2">
                    <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-2">Email Liên hệ</label>
                    <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
@@ -278,7 +255,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
           </div>
         </div>
 
-        <div className={`grid grid-cols-1 ${isMobile ? '' : 'lg:grid-cols-2'} gap-8`}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* SECTION 1: DISPLAY & PAGINATION */}
           <div className="bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl p-6 shadow-xl hover:border-primary/30 transition-colors">
             <div className="flex items-start gap-4 mb-6">
@@ -391,7 +368,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
           </div>
 
           {/* SECTION 3: BACKUP & RESTORE */}
-          <div className={`${isMobile ? '' : 'lg:col-span-2'} bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl p-6 shadow-xl hover:border-emerald-500/30 transition-colors relative overflow-hidden`}>
+          <div className="lg:col-span-2 bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-2xl p-6 shadow-xl hover:border-emerald-500/30 transition-colors relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-5">
                <Database className="w-48 h-48 text-emerald-500" />
             </div>
@@ -406,7 +383,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
               </div>
             </div>
 
-            <div className={`grid grid-cols-1 ${isMobile ? '' : 'md:grid-cols-2'} gap-8 relative z-10`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
                {/* Backup Column */}
                <div className="bg-slate-50 dark:bg-dark-950/50 p-5 rounded-xl border border-slate-200 dark:border-dark-600 flex flex-col">
                   <h4 className="text-slate-800 dark:text-white font-semibold mb-2 flex items-center gap-2">
@@ -453,8 +430,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave, userProfile, onUp
 
       </div>
 
-      {/* Floating Action Button - Shifted left to accommodate global feedback button */}
-      <div className={`fixed z-20 ${isMobile ? 'bottom-20 right-20' : 'bottom-6 right-24'}`}>
+      <div className="fixed z-20 bottom-6 right-24">
         <button
           onClick={handleSave}
           className="flex items-center gap-2 px-6 py-4 bg-primary hover:bg-indigo-500 text-white rounded-2xl font-bold shadow-2xl shadow-primary/40 transition-all hover:-translate-y-1 active:scale-95"
