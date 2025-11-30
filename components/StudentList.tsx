@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Plus, Download, Trash2, Edit2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, History, Clock, ArrowUpLeft, LayoutGrid, List, ArrowUpDown, Mail, AlertTriangle, CircleDollarSign } from 'lucide-react';
+import { Search, Plus, Download, Trash2, Edit2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Eye, History, Clock, ArrowUpLeft, LayoutGrid, List, ArrowUpDown, Mail, AlertTriangle, CircleDollarSign, CheckSquare, Square } from 'lucide-react';
 import { Student, StudentStatus } from '../types';
 import StudentDetail from './StudentDetail';
 import AddStudentModal from './AddStudentModal';
@@ -11,17 +11,21 @@ interface StudentListProps {
   onAddStudent: (student: Student) => void;
   onUpdateStudent: (student: Student) => void;
   onDeleteStudent: (studentId: string) => void;
+  onDeleteStudents: (studentIds: string[]) => void;
   userRole: string;
 }
 
 type SortKey = 'name' | 'gpa' | 'attendance' | 'joinDate' | 'tuitionPaid';
 type SortDirection = 'asc' | 'desc';
 
-const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAddStudent, onUpdateStudent, onDeleteStudent, userRole }) => {
+const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAddStudent, onUpdateStudent, onDeleteStudent, onDeleteStudents, userRole }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   
+  // Selection State for Batch Actions
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [studentToEdit, setStudentToEdit] = useState<Student | undefined>(undefined);
@@ -39,6 +43,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
 
   // Delete Confirmation State
   const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
+  const [showBatchDeleteConfirm, setShowBatchDeleteConfirm] = useState(false);
 
   useEffect(() => {
     const savedHistory = localStorage.getItem('student_search_history');
@@ -50,6 +55,11 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
       }
     }
   }, []);
+
+  // Clear selection when search changes to avoid deleting hidden items accidentally
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [searchTerm]);
 
   const saveSearchTerm = (term: string) => {
     if (!term.trim()) return;
@@ -174,16 +184,31 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
     if (studentToDelete) {
       onDeleteStudent(studentToDelete.id);
       setStudentToDelete(null);
+      // Remove from selection if it was selected
+      if (selectedIds.has(studentToDelete.id)) {
+        const newSet = new Set(selectedIds);
+        newSet.delete(studentToDelete.id);
+        setSelectedIds(newSet);
+      }
+    } else if (showBatchDeleteConfirm) {
+      onDeleteStudents(Array.from(selectedIds));
+      setSelectedIds(new Set());
+      setShowBatchDeleteConfirm(false);
     }
   };
 
   const handleExport = () => {
-    if (processedStudents.length === 0) {
+    // Export selected students if any, otherwise export all filtered
+    const studentsToExport = selectedIds.size > 0 
+      ? processedStudents.filter(s => selectedIds.has(s.id))
+      : processedStudents;
+
+    if (studentsToExport.length === 0) {
       alert("Không có dữ liệu học viên để xuất.");
       return;
     }
     const headers = ["Mã Học viên", "Họ và Tên", "Email", "Số điện thoại", "Ngày sinh", "Lớp học", "GPA", "Chuyên cần (%)", "Trạng thái", "Học phí"];
-    const rows = processedStudents.map(student => [
+    const rows = studentsToExport.map(student => [
       `"${student.id}"`, `"${student.name}"`, `"${student.email}"`, `"${student.phone}"`, `"${formatDate(student.dob)}"`,
       `"${student.classId}"`, `"${student.gpa}"`, `"${student.attendance}%"`, `"${student.status}"`,
       `"${student.tuitionPaid ? 'Đã đóng' : 'Chưa đóng'}"`
@@ -199,9 +224,33 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
     document.body.removeChild(link);
   };
 
+  // Selection Handlers
+  const toggleSelectStudent = (id: string) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIds(newSet);
+  };
+
+  const toggleSelectAll = () => {
+    const allCurrentIds = currentItems.map(s => s.id);
+    const areAllSelected = allCurrentIds.every(id => selectedIds.has(id));
+    
+    const newSet = new Set(selectedIds);
+    if (areAllSelected) {
+      allCurrentIds.forEach(id => newSet.delete(id));
+    } else {
+      allCurrentIds.forEach(id => newSet.add(id));
+    }
+    setSelectedIds(newSet);
+  };
+
   return (
     <>
-      <div className="p-4 md:p-5 h-full flex flex-col animate-fade-in">
+      <div className="p-4 md:p-5 h-full flex flex-col animate-fade-in relative">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
           <div>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-0.5">Học viên</h2>
@@ -213,7 +262,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                className="flex-1 md:flex-none items-center justify-center gap-2 px-3 py-2 text-xs font-medium bg-slate-200 dark:bg-dark-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg border border-slate-300 dark:border-dark-600 hover:bg-slate-300 dark:hover:bg-dark-600 transition-all"
              >
                <Download className="w-3.5 h-3.5" />
-               <span>Excel</span>
+               <span>Excel {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}</span>
              </button>
              
              {isAdmin && (
@@ -346,6 +395,26 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
           </div>
         </div>
 
+        {/* Batch Action Bar */}
+        {selectedIds.size > 0 && isAdmin && (
+           <div className="absolute top-[50px] left-1/2 -translate-x-1/2 z-40 bg-dark-800 text-white px-4 py-2 rounded-lg shadow-xl flex items-center gap-4 animate-slide-up border border-dark-600">
+              <span className="text-xs font-bold">{selectedIds.size} đã chọn</span>
+              <div className="h-4 w-px bg-white/20"></div>
+              <button 
+                onClick={() => setShowBatchDeleteConfirm(true)}
+                className="flex items-center gap-2 text-xs font-bold text-rose-400 hover:text-rose-300 transition-colors"
+              >
+                 <Trash2 className="w-3.5 h-3.5" /> Xóa hàng loạt
+              </button>
+              <button 
+                onClick={() => setSelectedIds(new Set())}
+                className="text-xs text-slate-400 hover:text-white transition-colors"
+              >
+                 Hủy
+              </button>
+           </div>
+        )}
+
         {/* Content Area */}
         {currentItems.length === 0 ? (
            <div className="flex-1 flex flex-col items-center justify-center bg-white dark:bg-dark-800 rounded-xl border border-slate-200 dark:border-dark-700 p-12 text-center shadow-sm">
@@ -365,95 +434,112 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                ${viewMode === 'list' ? 'hidden md:block' : ''} 
                ${/* Force grid style on mobile even if list is selected */ 'block md:hidden grid grid-cols-1 gap-3'}
              `}>
-                  {currentItems.map((student) => (
-                    <div 
-                      key={student.id} 
-                      onClick={() => setSelectedStudent(student)}
-                      className="group bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 rounded-xl p-3 shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col"
-                    >
-                      <div className={`absolute top-0 left-0 w-full h-1 ${student.gpa >= 8 ? 'bg-emerald-500' : student.gpa >= 5 ? 'bg-primary' : 'bg-rose-500'}`}></div>
-                      
-                      <div className="absolute top-2 right-2 z-10">
-                        <button 
-                          onClick={(e) => toggleTuition(e, student)}
-                          className={`p-1 rounded-full transition-all duration-300 ${
-                            student.tuitionPaid 
-                              ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20' 
-                              : 'bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 animate-pulse'
-                          }`}
-                          title={student.tuitionPaid ? "Đã đóng học phí" : "Chưa đóng học phí"}
-                        >
-                          <CircleDollarSign className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                  {currentItems.map((student) => {
+                    const isSelected = selectedIds.has(student.id);
+                    return (
+                      <div 
+                        key={student.id} 
+                        onClick={() => setSelectedStudent(student)}
+                        className={`group bg-white dark:bg-dark-800 border rounded-xl p-3 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col ${isSelected ? 'border-primary ring-1 ring-primary' : 'border-slate-200 dark:border-dark-700 hover:border-primary/30'}`}
+                      >
+                        <div className={`absolute top-0 left-0 w-full h-1 ${student.gpa >= 8 ? 'bg-emerald-500' : student.gpa >= 5 ? 'bg-primary' : 'bg-rose-500'}`}></div>
+                        
+                        {/* Checkbox for selection (Desktop/Grid) */}
+                        {isAdmin && (
+                           <div 
+                              className="absolute top-2 left-2 z-10"
+                              onClick={(e) => { e.stopPropagation(); toggleSelectStudent(student.id); }}
+                           >
+                              {isSelected ? (
+                                 <CheckSquare className="w-5 h-5 text-primary fill-white dark:fill-dark-800" />
+                              ) : (
+                                 <Square className="w-5 h-5 text-slate-300 dark:text-dark-600 hover:text-slate-500" />
+                              )}
+                           </div>
+                        )}
 
-                      <div className="flex justify-between items-start mb-2">
-                         <div className="relative">
-                            <img src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full border-2 border-slate-100 dark:border-dark-600 object-cover group-hover:scale-105 transition-transform" />
-                            <span className={`absolute -bottom-1 -right-1 w-4 h-4 text-[9px] rounded-full border-2 border-white dark:border-dark-800 flex items-center justify-center font-bold text-white ${student.gpa >= 5 ? 'bg-emerald-500' : 'bg-rose-500'}`}>
-                               {student.gpa}
-                            </span>
-                         </div>
-                         <div className="flex flex-col items-end pt-2">
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide border ${getStatusColor(student.status)}`}>
-                              {student.status}
-                            </span>
-                            <span className="text-[9px] text-slate-400 mt-0.5">{student.id}</span>
-                         </div>
-                      </div>
+                        <div className="absolute top-2 right-2 z-10">
+                          <button 
+                            onClick={(e) => toggleTuition(e, student)}
+                            className={`p-1 rounded-full transition-all duration-300 ${
+                              student.tuitionPaid 
+                                ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20' 
+                                : 'bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 animate-pulse'
+                            }`}
+                            title={student.tuitionPaid ? "Đã đóng học phí" : "Chưa đóng học phí"}
+                          >
+                            <CircleDollarSign className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
 
-                      <div className="mb-2 flex-1">
-                         <h3 className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1" title={student.name}>{student.name}</h3>
-                         <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 mb-2">
-                            <Mail className="w-3 h-3" /> <span className="truncate">{student.email}</span>
-                         </div>
-                         <div className="bg-slate-50 dark:bg-dark-900/50 rounded-lg p-2 border border-slate-100 dark:border-dark-700/50">
-                            <div className="flex items-center justify-between text-[10px] mb-1">
-                               <span className="text-slate-500">Lớp học</span>
-                               <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[120px]" title={student.classId}>{student.classId || 'Chưa phân lớp'}</span>
-                            </div>
-                            <div className="flex items-center justify-between text-[10px]">
-                               <span className="text-slate-500">Chuyên cần</span>
-                               <span className={`font-bold ${student.attendance >= 90 ? 'text-emerald-500' : 'text-amber-500'}`}>{student.attendance}%</span>
-                            </div>
-                            <div className="w-full bg-slate-200 dark:bg-dark-700 h-1 rounded-full mt-2 overflow-hidden">
-                               <div className={`h-full rounded-full ${student.attendance >= 90 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${student.attendance}%` }} />
-                            </div>
-                         </div>
-                      </div>
+                        <div className="flex justify-between items-start mb-2 pl-6">
+                           <div className="relative">
+                              <img src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full border-2 border-slate-100 dark:border-dark-600 object-cover group-hover:scale-105 transition-transform" />
+                              <span className={`absolute -bottom-1 -right-1 w-4 h-4 text-[9px] rounded-full border-2 border-white dark:border-dark-800 flex items-center justify-center font-bold text-white ${student.gpa >= 5 ? 'bg-emerald-500' : 'bg-rose-500'}`}>
+                                 {student.gpa}
+                              </span>
+                           </div>
+                           <div className="flex flex-col items-end pt-2">
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide border ${getStatusColor(student.status)}`}>
+                                {student.status}
+                              </span>
+                              <span className="text-[9px] text-slate-400 mt-0.5">{student.id}</span>
+                           </div>
+                        </div>
 
-                      <div className="pt-2 border-t border-slate-100 dark:border-dark-700 flex justify-between items-center mt-auto" onClick={(e) => e.stopPropagation()}>
-                         <div className="flex gap-2">
-                            {isAdmin ? (
-                               <>
-                                <button 
-                                  onClick={(e) => handleOpenEdit(e, student)}
-                                  className="text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors group/btn relative z-10 p-1.5" 
-                                  title="Chỉnh sửa"
-                                >
-                                   <Edit2 className="w-3.5 h-3.5" />
-                                </button>
-                                <button 
-                                  onClick={(e) => initiateDelete(e, student)}
-                                  className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors group/btn relative z-10 p-1.5" 
-                                  title="Xóa"
-                                >
-                                   <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                               </>
-                            ) : (
-                               <span className="text-[10px] text-slate-400 italic">Chỉ xem</span>
-                            )}
-                         </div>
-                         <button 
-                            onClick={() => setSelectedStudent(student)}
-                            className="text-[10px] font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all"
-                         >
-                            Chi tiết <ChevronRight className="w-3 h-3" />
-                         </button>
+                        <div className="mb-2 flex-1">
+                           <h3 className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1" title={student.name}>{student.name}</h3>
+                           <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 mb-2">
+                              <Mail className="w-3 h-3" /> <span className="truncate">{student.email}</span>
+                           </div>
+                           <div className="bg-slate-50 dark:bg-dark-900/50 rounded-lg p-2 border border-slate-100 dark:border-dark-700/50">
+                              <div className="flex items-center justify-between text-[10px] mb-1">
+                                 <span className="text-slate-500">Lớp học</span>
+                                 <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[120px]" title={student.classId}>{student.classId || 'Chưa phân lớp'}</span>
+                              </div>
+                              <div className="flex items-center justify-between text-[10px]">
+                                 <span className="text-slate-500">Chuyên cần</span>
+                                 <span className={`font-bold ${student.attendance >= 90 ? 'text-emerald-500' : 'text-amber-500'}`}>{student.attendance}%</span>
+                              </div>
+                              <div className="w-full bg-slate-200 dark:bg-dark-700 h-1 rounded-full mt-2 overflow-hidden">
+                                 <div className={`h-full rounded-full ${student.attendance >= 90 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${student.attendance}%` }} />
+                              </div>
+                           </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-100 dark:border-dark-700 flex justify-between items-center mt-auto" onClick={(e) => e.stopPropagation()}>
+                           <div className="flex gap-2">
+                              {isAdmin ? (
+                                 <>
+                                  <button 
+                                    onClick={(e) => handleOpenEdit(e, student)}
+                                    className="text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors group/btn relative z-10 p-1.5" 
+                                    title="Chỉnh sửa"
+                                  >
+                                     <Edit2 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button 
+                                    onClick={(e) => initiateDelete(e, student)}
+                                    className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors group/btn relative z-10 p-1.5" 
+                                    title="Xóa"
+                                  >
+                                     <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                 </>
+                              ) : (
+                                 <span className="text-[10px] text-slate-400 italic">Chỉ xem</span>
+                              )}
+                           </div>
+                           <button 
+                              onClick={() => setSelectedStudent(student)}
+                              className="text-[10px] font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all"
+                           >
+                              Chi tiết <ChevronRight className="w-3 h-3" />
+                           </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
              </div>
              
              {/* List View - Desktop Only */}
@@ -463,6 +549,17 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-slate-50 dark:bg-dark-900/50 border-b border-slate-200 dark:border-dark-700">
+                          {isAdmin && (
+                             <th className="p-2.5 w-10 text-center">
+                                <div onClick={toggleSelectAll} className="cursor-pointer">
+                                  {currentItems.length > 0 && currentItems.every(s => selectedIds.has(s.id)) ? (
+                                     <CheckSquare className="w-4 h-4 text-primary" />
+                                  ) : (
+                                     <Square className="w-4 h-4 text-slate-400" />
+                                  )}
+                                </div>
+                             </th>
+                          )}
                           <th className="p-2.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Học viên</th>
                           <th className="p-2.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Lớp học</th>
                           <th className="p-2.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Học phí</th>
@@ -473,83 +570,97 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-dark-700">
-                        {currentItems.map((student) => (
-                          <tr 
-                            key={student.id} 
-                            onClick={() => setSelectedStudent(student)}
-                            className="group cursor-pointer hover:bg-slate-50 dark:hover:bg-dark-700/80 transition-all duration-300"
-                          >
-                            <td className="p-2.5">
-                              <div className="flex items-center gap-3">
-                                <img src={student.avatar} alt={student.name} className="w-8 h-8 rounded-full border border-slate-200 dark:border-dark-600 object-cover group-hover:scale-105 transition-transform" />
-                                <div>
-                                  <p className="font-medium text-xs text-slate-800 dark:text-white group-hover:text-primary transition-colors">{student.name}</p>
-                                  <p className="text-[10px] text-slate-500">{student.email}</p>
+                        {currentItems.map((student) => {
+                          const isSelected = selectedIds.has(student.id);
+                          return (
+                            <tr 
+                              key={student.id} 
+                              onClick={() => setSelectedStudent(student)}
+                              className={`group cursor-pointer transition-all duration-300 ${isSelected ? 'bg-indigo-50 dark:bg-indigo-900/20' : 'hover:bg-slate-50 dark:hover:bg-dark-700/80'}`}
+                            >
+                              {isAdmin && (
+                                <td className="p-2.5 text-center" onClick={(e) => e.stopPropagation()}>
+                                  <div onClick={() => toggleSelectStudent(student.id)} className="cursor-pointer inline-block">
+                                     {isSelected ? (
+                                        <CheckSquare className="w-4 h-4 text-primary" />
+                                     ) : (
+                                        <Square className="w-4 h-4 text-slate-300 dark:text-dark-600 hover:text-slate-500" />
+                                     )}
+                                  </div>
+                                </td>
+                              )}
+                              <td className="p-2.5">
+                                <div className="flex items-center gap-3">
+                                  <img src={student.avatar} alt={student.name} className="w-8 h-8 rounded-full border border-slate-200 dark:border-dark-600 object-cover group-hover:scale-105 transition-transform" />
+                                  <div>
+                                    <p className="font-medium text-xs text-slate-800 dark:text-white group-hover:text-primary transition-colors">{student.name}</p>
+                                    <p className="text-[10px] text-slate-500">{student.email}</p>
+                                  </div>
                                 </div>
-                              </div>
-                            </td>
-                            <td className="p-2.5 text-xs text-slate-600 dark:text-slate-300 max-w-[150px] truncate">{student.classId || 'Chưa phân lớp'}</td>
-                            <td className="p-2.5">
-                              <button 
-                                onClick={(e) => toggleTuition(e, student)}
-                                className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-medium border transition-all ${
-                                  student.tuitionPaid 
-                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' 
-                                    : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 hover:bg-rose-500/20'
-                                }`}
-                              >
-                                <CircleDollarSign className="w-3 h-3" />
-                                {student.tuitionPaid ? 'Hoàn thành' : 'Chưa đóng'}
-                              </button>
-                            </td>
-                            <td className="p-2.5">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${getStatusColor(student.status)}`}>
-                                {student.status}
-                              </span>
-                            </td>
-                            <td className="p-2.5 text-center">
-                              <span className={`font-bold text-xs ${student.gpa >= 8 ? 'text-emerald-500 dark:text-emerald-400' : student.gpa >= 5 ? 'text-slate-700 dark:text-slate-200' : 'text-rose-500 dark:text-rose-400'}`}>
-                                {student.gpa}
-                              </span>
-                            </td>
-                            <td className="p-2.5">
-                              <div className="flex items-center justify-center gap-2">
-                                <div className="w-16 h-1 bg-slate-200 dark:bg-dark-900 rounded-full overflow-hidden">
-                                  <div 
-                                    className={`h-full rounded-full ${student.attendance >= 80 ? 'bg-emerald-500' : 'bg-amber-500'}`} 
-                                    style={{ width: `${student.attendance}%` }}
-                                  />
-                                </div>
-                                <span className="text-[10px] text-slate-500 dark:text-slate-400 w-6">{student.attendance}%</span>
-                              </div>
-                            </td>
-                            <td className="p-2.5 text-right" onClick={(e) => e.stopPropagation()}>
-                              <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => setSelectedStudent(student)} className="p-1.5 text-slate-400 hover:text-primary rounded-lg transition-colors group/btn relative z-10" title="Xem chi tiết">
-                                  <Eye className="w-3.5 h-3.5" />
+                              </td>
+                              <td className="p-2.5 text-xs text-slate-600 dark:text-slate-300 max-w-[150px] truncate">{student.classId || 'Chưa phân lớp'}</td>
+                              <td className="p-2.5">
+                                <button 
+                                  onClick={(e) => toggleTuition(e, student)}
+                                  className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-medium border transition-all ${
+                                    student.tuitionPaid 
+                                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' 
+                                      : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 hover:bg-rose-500/20'
+                                  }`}
+                                >
+                                  <CircleDollarSign className="w-3 h-3" />
+                                  {student.tuitionPaid ? 'Hoàn thành' : 'Chưa đóng'}
                                 </button>
-                                {isAdmin && (
-                                  <>
-                                    <button 
-                                      onClick={(e) => handleOpenEdit(e, student)}
-                                      className="p-1.5 text-slate-400 hover:text-amber-500 rounded-lg transition-colors group/btn relative z-10" 
-                                      title="Chỉnh sửa"
-                                    >
-                                      <Edit2 className="w-3.5 h-3.5" />
-                                    </button>
-                                    <button 
-                                      onClick={(e) => initiateDelete(e, student)}
-                                      className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors group/btn relative z-10" 
-                                      title="Xóa"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
-                                  </>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                              </td>
+                              <td className="p-2.5">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${getStatusColor(student.status)}`}>
+                                  {student.status}
+                                </span>
+                              </td>
+                              <td className="p-2.5 text-center">
+                                <span className={`font-bold text-xs ${student.gpa >= 8 ? 'text-emerald-500 dark:text-emerald-400' : student.gpa >= 5 ? 'text-slate-700 dark:text-slate-200' : 'text-rose-500 dark:text-rose-400'}`}>
+                                  {student.gpa}
+                                </span>
+                              </td>
+                              <td className="p-2.5">
+                                <div className="flex items-center justify-center gap-2">
+                                  <div className="w-16 h-1 bg-slate-200 dark:bg-dark-900 rounded-full overflow-hidden">
+                                    <div 
+                                      className={`h-full rounded-full ${student.attendance >= 80 ? 'bg-emerald-500' : 'bg-amber-500'}`} 
+                                      style={{ width: `${student.attendance}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-[10px] text-slate-500 dark:text-slate-400 w-6">{student.attendance}%</span>
+                                </div>
+                              </td>
+                              <td className="p-2.5 text-right" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => setSelectedStudent(student)} className="p-1.5 text-slate-400 hover:text-primary rounded-lg transition-colors group/btn relative z-10" title="Xem chi tiết">
+                                    <Eye className="w-3.5 h-3.5" />
+                                  </button>
+                                  {isAdmin && (
+                                    <>
+                                      <button 
+                                        onClick={(e) => handleOpenEdit(e, student)}
+                                        className="p-1.5 text-slate-400 hover:text-amber-500 rounded-lg transition-colors group/btn relative z-10" 
+                                        title="Chỉnh sửa"
+                                      >
+                                        <Edit2 className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button 
+                                        onClick={(e) => initiateDelete(e, student)}
+                                        className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors group/btn relative z-10" 
+                                        title="Xóa"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -621,20 +732,27 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
         />
       )}
 
-      {studentToDelete && (
+      {(studentToDelete || showBatchDeleteConfirm) && (
          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
            <div className="bg-dark-800 rounded-2xl border border-dark-600 shadow-2xl p-6 max-w-sm w-full animate-slide-up">
               <div className="flex items-center justify-center w-14 h-14 rounded-full bg-rose-500/10 mb-4 mx-auto border border-rose-500/20">
                  <AlertTriangle className="w-8 h-8 text-rose-500" />
               </div>
-              <h3 className="text-lg font-bold text-white text-center mb-2">Xóa Học viên?</h3>
+              <h3 className="text-lg font-bold text-white text-center mb-2">
+                {showBatchDeleteConfirm ? `Xóa ${selectedIds.size} Học viên?` : 'Xóa Học viên?'}
+              </h3>
               <p className="text-slate-400 text-center text-xs mb-6 leading-relaxed">
-                 Bạn có chắc muốn xóa học viên <b>{studentToDelete.name}</b>? <br/>
+                 {showBatchDeleteConfirm ? (
+                    <>Bạn có chắc muốn xóa <b>{selectedIds.size}</b> học viên đã chọn?</>
+                 ) : (
+                    <>Bạn có chắc muốn xóa học viên <b>{studentToDelete?.name}</b>?</>
+                 )}
+                 <br/>
                  <span className="text-rose-400 font-medium">Hành động này không thể hoàn tác.</span>
               </p>
               <div className="flex gap-3">
                  <button 
-                    onClick={() => setStudentToDelete(null)}
+                    onClick={() => { setStudentToDelete(null); setShowBatchDeleteConfirm(false); }}
                     className="flex-1 py-2 rounded-lg border border-dark-600 text-slate-300 hover:bg-dark-700 transition-colors font-medium text-xs"
                  >
                     Hủy bỏ
