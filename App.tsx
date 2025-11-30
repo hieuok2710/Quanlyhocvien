@@ -45,6 +45,8 @@ const generateMockData = () => {
       gpa: gpa,
       attendance: Math.floor(Math.random() * (100 - 60) + 60),
       tuitionPaid: Math.random() > 0.3, // 70% students paid
+      attendanceRecord: {},
+      tuitionRecord: {},
       scores: scores
     };
   });
@@ -212,6 +214,20 @@ const App: React.FC = () => {
     });
   };
 
+  const handleBatchUpdateStudents = (updatedStudents: Student[]) => {
+    setData(prev => {
+      if (!prev) return prev;
+      const updatesMap = new Map(updatedStudents.map(s => [s.id, s]));
+      const newStudents = prev.students.map(s => {
+        if (updatesMap.has(s.id)) {
+          return updatesMap.get(s.id)!;
+        }
+        return s;
+      });
+      return { ...prev, students: newStudents };
+    });
+  };
+
   const handleAddClass = (newClass: ClassRoom) => {
     setData(prev => {
       if (!prev) return prev;
@@ -325,6 +341,7 @@ const App: React.FC = () => {
           <AttendanceManager 
             students={data.students} 
             classes={data.classes}
+            onSave={handleBatchUpdateStudents}
           />
         );
       case 'SETTINGS':

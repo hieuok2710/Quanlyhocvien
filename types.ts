@@ -1,5 +1,4 @@
 
-
 export enum StudentStatus {
   ACTIVE = 'Đang học',
   INACTIVE = 'Bảo lưu',
@@ -14,6 +13,16 @@ export interface SubjectScore {
   date: string;
 }
 
+export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'NONE';
+
+export interface AttendanceRecord {
+  [date: string]: AttendanceStatus;
+}
+
+export interface TuitionRecord {
+  [month: string]: boolean; // Format "YYYY-MM"
+}
+
 export interface Student {
   id: string;
   name: string;
@@ -26,7 +35,9 @@ export interface Student {
   status: StudentStatus;
   gpa: number;
   attendance: number; // Percentage
-  tuitionPaid: boolean; // Payment status
+  attendanceRecord?: AttendanceRecord; // Detailed history
+  tuitionPaid: boolean; // Current status
+  tuitionRecord?: TuitionRecord; // Monthly history
   scores: SubjectScore[];
 }
 

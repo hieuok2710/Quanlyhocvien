@@ -1,14 +1,13 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Check, X, Clock, Save, Search, Filter, AlertCircle, Calculator, Download, CalendarDays, CircleDollarSign } from 'lucide-react';
-import { Student, ClassRoom } from '../types';
+import { Student, ClassRoom, AttendanceStatus } from '../types';
 
 interface AttendanceManagerProps {
   students: Student[];
   classes: ClassRoom[];
+  onSave?: (updatedStudents: Student[]) => void;
 }
-
-type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'NONE';
 
 interface AttendanceHistory {
   [studentId: string]: {
@@ -22,7 +21,7 @@ interface TuitionHistory {
   };
 }
 
-const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes }) => {
+const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes, onSave }) => {
   
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -66,24 +65,38 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
   const [attendanceData, setAttendanceData] = useState<AttendanceHistory>({});
   const [tuitionData, setTuitionData] = useState<TuitionHistory>({});
 
-  const filteredStudents = students.filter(student => 
+  const filteredStudents = useMemo(() => students.filter(student => 
     student.classId === selectedClass &&
     (student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
      student.email.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  ), [students, selectedClass, searchQuery]);
 
+  // Load existing data from props into state when filteredStudents or month changes
   useEffect(() => {
-    setTuitionData(prev => {
+    setAttendanceData(prev => {
       const newState = { ...prev };
       filteredStudents.forEach(s => {
-        if (!newState[s.id]) newState[s.id] = {};
-        if (newState[s.id][selectedMonth] === undefined) {
-           newState[s.id][selectedMonth] = s.tuitionPaid; 
+        if (!newState[s.id]) {
+           newState[s.id] = s.attendanceRecord || {};
         }
       });
       return newState;
     });
-  }, [selectedMonth, filteredStudents]);
+
+    setTuitionData(prev => {
+      const newState = { ...prev };
+      filteredStudents.forEach(s => {
+        if (!newState[s.id]) {
+           newState[s.id] = s.tuitionRecord || {};
+        }
+        // Ensure current month has a value (defaulting to current prop or false)
+        if (newState[s.id][selectedMonth] === undefined) {
+           newState[s.id][selectedMonth] = s.tuitionRecord?.[selectedMonth] ?? s.tuitionPaid ?? false; 
+        }
+      });
+      return newState;
+    });
+  }, [filteredStudents, selectedMonth]);
 
   const toggleStatus = (studentId: string, date: string) => {
     setAttendanceData(prev => {
@@ -164,25 +177,65 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     let present = 0;
     let totalMarked = 0;
     
-    daysInMonth.forEach(({ fullDate }) => {
-      const status = record[fullDate];
-      if (status && status !== 'NONE') {
-        totalMarked++;
-        if (status === 'PRESENT') present += 1;
-        if (status === 'LATE') present += 0.5;
-      }
+    // We can calculate stats based on currently visible month or all history.
+    // For now, let's calculate based on ALL history available in the record for this student
+    // to reflect a cumulative attendance rate, OR just the current month.
+    // Let's stick to the current month for the "Monthly View" context, 
+    // but the `student.attendance` prop usually reflects overall course attendance.
+    
+    // Simple calculation: Count all keys in the record
+    Object.keys(record).forEach(dateKey => {
+       const status = record[dateKey];
+       if (status && status !== 'NONE') {
+         totalMarked++;
+         if (status === 'PRESENT') present += 1;
+         if (status === 'LATE') present += 0.5;
+       }
     });
 
-    const percentage = totalMarked === 0 ? 0 : Math.round((present / totalMarked) * 100);
+    const percentage = totalMarked === 0 ? 100 : Math.round((present / totalMarked) * 100);
     return { percentage, totalMarked };
   };
 
   const handleSave = () => {
+    if (!onSave) return;
     setIsSaving(true);
+    
+    // Prepare updated student objects
+    const updatedStudents = filteredStudents.map(student => {
+      const newAttendanceRecord = { ...(student.attendanceRecord || {}), ...(attendanceData[student.id] || {}) };
+      const newTuitionRecord = { ...(student.tuitionRecord || {}), ...(tuitionData[student.id] || {}) };
+      
+      // Recalculate global attendance %
+      let present = 0;
+      let total = 0;
+      Object.values(newAttendanceRecord).forEach(status => {
+         if (status && status !== 'NONE') {
+           total++;
+           if (status === 'PRESENT') present += 1;
+           if (status === 'LATE') present += 0.5;
+         }
+      });
+      const newAttendancePct = total === 0 ? 100 : Math.round((present / total) * 100);
+      
+      // Update tuition status for current month view
+      const isPaidThisMonth = newTuitionRecord[selectedMonth] || false;
+
+      return {
+        ...student,
+        attendanceRecord: newAttendanceRecord,
+        tuitionRecord: newTuitionRecord,
+        attendance: newAttendancePct,
+        tuitionPaid: isPaidThisMonth // Update the main flag based on current month context
+      };
+    });
+
+    // Simulate network delay for UX
     setTimeout(() => {
+      onSave(updatedStudents);
       setIsSaving(false);
-      alert(`Đã lưu dữ liệu điểm danh và học phí tháng ${selectedMonth} cho ${filteredStudents.length} học viên.`);
-    }, 1000);
+      alert(`Đã lưu dữ liệu điểm danh và học phí tháng ${selectedMonth} cho ${updatedStudents.length} học viên.`);
+    }, 800);
   };
 
   const handleExport = () => {
