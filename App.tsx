@@ -228,16 +228,6 @@ const App: React.FC = () => {
     });
   };
 
-  const handleBatchDeleteStudents = (studentIds: string[]) => {
-    setData(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        students: prev.students.filter(s => !studentIds.includes(s.id))
-      };
-    });
-  };
-
   const handleAddClass = (newClass: ClassRoom) => {
     setData(prev => {
       if (!prev) return prev;
@@ -331,7 +321,6 @@ const App: React.FC = () => {
             onAddStudent={handleAddStudent}
             onUpdateStudent={handleUpdateStudent}
             onDeleteStudent={handleDeleteStudent}
-            onDeleteStudents={handleBatchDeleteStudents}
             userRole={userProfile.role}
           />
         );
