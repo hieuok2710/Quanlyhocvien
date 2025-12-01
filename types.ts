@@ -79,3 +79,11 @@ export interface UserProfile {
   email: string;
   avatar: string;
 }
+
+// NEW: Interface for User Accounts (Auth)
+export interface UserAccount extends UserProfile {
+  id: string;
+  password: string; // In a real app, this should be hashed. Storing plain for demo.
+  isActive: boolean;
+  createdAt: string;
+}

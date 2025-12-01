@@ -26,8 +26,8 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [studentToEdit, setStudentToEdit] = useState<Student | undefined>(undefined);
   
-  // View Mode State
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  // View Mode State - Default to 'list' for desktop
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   
   // Sorting State
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection }>({ key: 'joinDate', direction: 'desc' });
@@ -228,7 +228,7 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
           </div>
         </div>
 
-        {/* Filters Bar - Stacked on Mobile */}
+        {/* Filters Bar */}
         <div className="bg-white dark:bg-dark-800 p-3 rounded-lg border border-slate-200 dark:border-dark-700 mb-3 flex flex-col md:flex-row items-stretch md:items-center gap-3 shadow-sm relative z-30">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5" />
@@ -359,12 +359,12 @@ const StudentList: React.FC<StudentListProps> = ({ students, itemsPerPage, onAdd
            </div>
         ) : (
           <div className="flex-1 overflow-y-auto custom-scrollbar -mx-2 px-2 pb-4">
-             {/* Force Grid on Mobile, respect ViewMode on Desktop */}
-             <div className={`
-               ${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3' : 'hidden md:block'}
-               ${viewMode === 'list' ? 'hidden md:block' : ''} 
-               ${/* Force grid style on mobile even if list is selected */ 'block md:hidden grid grid-cols-1 gap-3'}
-             `}>
+             {/* 
+                Grid View Logic:
+                1. Always show on mobile (md:hidden)
+                2. On desktop, show ONLY if viewMode is 'grid' 
+             */}
+             <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3" : "grid grid-cols-1 gap-3 md:hidden"}>
                   {currentItems.map((student) => (
                     <div 
                       key={student.id} 

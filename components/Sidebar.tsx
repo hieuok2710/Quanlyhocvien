@@ -7,9 +7,10 @@ interface SidebarProps {
   currentView: ViewState;
   onChangeView: (view: ViewState) => void;
   userProfile: UserProfile;
+  onLogout: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, userProfile }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, userProfile, onLogout }) => {
   
   // Define distinct color themes for each menu item
   const menuConfig: Record<string, { 
@@ -141,10 +142,13 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, userProfil
               />
               <div className="flex flex-col overflow-hidden">
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{userProfile.name}</span>
-                <span className="text-[10px] text-slate-500 truncate">{userProfile.role}</span>
+                <span className="text-[10px] text-slate-500 truncate">{userProfile.email}</span>
               </div>
             </div>
-            <button className="w-full flex items-center justify-center gap-2 px-3 py-1.5 text-slate-500 dark:text-slate-400 hover:text-white bg-slate-200 dark:bg-black/20 hover:bg-rose-500 dark:hover:bg-rose-500/80 transition-all rounded-lg text-[10px] font-bold uppercase tracking-wide group">
+            <button 
+              onClick={onLogout}
+              className="w-full flex items-center justify-center gap-2 px-3 py-1.5 text-slate-500 dark:text-slate-400 hover:text-white bg-slate-200 dark:bg-black/20 hover:bg-rose-500 dark:hover:bg-rose-500/80 transition-all rounded-lg text-[10px] font-bold uppercase tracking-wide group"
+            >
               <LogOut className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
               Đăng xuất
             </button>
