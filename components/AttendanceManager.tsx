@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Check, X, Clock, Save, Search, Filter, AlertCircle, Calculator, Download, CalendarDays, CircleDollarSign } from 'lucide-react';
+import { Check, X, Clock, Save, Search, Filter, AlertCircle, Calculator, Download, CalendarDays, CircleDollarSign, CalendarRange, Eye, EyeOff } from 'lucide-react';
 import { Student, ClassRoom, AttendanceStatus } from '../types';
 
 interface AttendanceManagerProps {
@@ -27,6 +27,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
   const [searchQuery, setSearchQuery] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [highlightedStudentId, setHighlightedStudentId] = useState<string | null>(null);
+  const [showAllDays, setShowAllDays] = useState(false); // Toggle to ignore schedule filter
 
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
     const now = new Date();
@@ -39,8 +40,41 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     }
   }, [classes, selectedClass]);
 
+  // Helper: Check if a date matches the class schedule string
+  const isDayInSchedule = (date: Date, scheduleStr: string) => {
+      if (!scheduleStr) return true; // No schedule defined? Show all.
+      
+      const normalizedSchedule = scheduleStr.toUpperCase();
+      const dayOfWeek = date.getDay(); // 0 (Sun) to 6 (Sat)
+
+      // Map JS getDay() to Vietnamese Schedule codes used in mock data
+      const map: Record<number, string> = {
+          0: 'CN',
+          1: 'T2',
+          2: 'T3',
+          3: 'T4',
+          4: 'T5',
+          5: 'T6',
+          6: 'T7'
+      };
+      
+      const code = map[dayOfWeek];
+
+      // Handle special keywords
+      if (normalizedSchedule.includes('HẰNG NGÀY') || normalizedSchedule.includes('MỌI NGÀY')) return true;
+      if (normalizedSchedule.includes('CUỐI TUẦN')) return code === 'T7' || code === 'CN';
+
+      // Standard check (e.g., "T2 - T4 - T6")
+      return normalizedSchedule.includes(code);
+  };
+
   const daysInMonth = useMemo(() => {
     if (!selectedMonth) return [];
+    
+    // Find current class to get schedule
+    const currentClassObj = classes.find(c => c.name === selectedClass);
+    const scheduleStr = currentClassObj?.schedule || '';
+
     const [year, month] = selectedMonth.split('-').map(Number);
     const date = new Date(year, month, 0); 
     const daysCount = date.getDate();
@@ -48,6 +82,13 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     const days = [];
     for (let i = 1; i <= daysCount; i++) {
       const d = new Date(year, month - 1, i);
+      
+      // Check if day matches schedule
+      // If showAllDays is true, ignore the check
+      if (!showAllDays && !isDayInSchedule(d, scheduleStr)) {
+         continue;
+      }
+
       const dateString = `${year}-${String(month).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
       const dayOfWeek = d.getDay();
       const dayLabel = dayOfWeek === 0 ? 'CN' : `T${dayOfWeek + 1}`;
@@ -60,7 +101,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
       });
     }
     return days;
-  }, [selectedMonth]);
+  }, [selectedMonth, selectedClass, classes, showAllDays]);
 
   const [attendanceData, setAttendanceData] = useState<AttendanceHistory>({});
   const [tuitionData, setTuitionData] = useState<TuitionHistory>({});
@@ -177,15 +218,10 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     let present = 0;
     let totalMarked = 0;
     
-    // We can calculate stats based on currently visible month or all history.
-    // For now, let's calculate based on ALL history available in the record for this student
-    // to reflect a cumulative attendance rate, OR just the current month.
-    // Let's stick to the current month for the "Monthly View" context, 
-    // but the `student.attendance` prop usually reflects overall course attendance.
-    
-    // Simple calculation: Count all keys in the record
-    Object.keys(record).forEach(dateKey => {
-       const status = record[dateKey];
+    // Calculate stats based on VISIBLE days (filtered by schedule)
+    // This makes the % more accurate to the actual schedule
+    daysInMonth.forEach(day => {
+       const status = record[day.fullDate];
        if (status && status !== 'NONE') {
          totalMarked++;
          if (status === 'PRESENT') present += 1;
@@ -206,7 +242,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
       const newAttendanceRecord = { ...(student.attendanceRecord || {}), ...(attendanceData[student.id] || {}) };
       const newTuitionRecord = { ...(student.tuitionRecord || {}), ...(tuitionData[student.id] || {}) };
       
-      // Recalculate global attendance %
+      // Recalculate global attendance % based on ALL history
       let present = 0;
       let total = 0;
       Object.values(newAttendanceRecord).forEach(status => {
@@ -226,7 +262,7 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
         attendanceRecord: newAttendanceRecord,
         tuitionRecord: newTuitionRecord,
         attendance: newAttendancePct,
-        tuitionPaid: isPaidThisMonth // Update the main flag based on current month context
+        tuitionPaid: isPaidThisMonth 
       };
     });
 
@@ -276,6 +312,9 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
     link.click();
     document.body.removeChild(link);
   };
+
+  // Get current class schedule for display
+  const currentClassSchedule = classes.find(c => c.name === selectedClass)?.schedule;
 
   return (
     <div className="p-4 md:p-6 md:pb-6 h-full flex flex-col animate-fade-in overflow-hidden">
@@ -344,7 +383,32 @@ const AttendanceManager: React.FC<AttendanceManagerProps> = ({ students, classes
                />
             </div>
          </div>
+
+         {/* View Toggle */}
+         <div className="flex items-center gap-2 border-l border-slate-200 dark:border-dark-700 pl-3">
+            <button 
+              onClick={() => setShowAllDays(!showAllDays)}
+              className={`p-2 rounded-lg transition-colors flex items-center gap-2 text-xs font-medium ${
+                showAllDays 
+                  ? 'bg-primary/10 text-primary border border-primary/20' 
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border border-transparent'
+              }`}
+              title={showAllDays ? "Đang hiển thị tất cả các ngày" : "Chỉ hiển thị ngày theo lịch học"}
+            >
+              {showAllDays ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+              <span className="hidden xl:inline">{showAllDays ? 'Tất cả ngày' : 'Theo lịch học'}</span>
+            </button>
+         </div>
       </div>
+      
+      {/* Schedule Info Banner */}
+      {currentClassSchedule && (
+        <div className="mb-2 flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 px-1">
+          <CalendarRange className="w-3 h-3 text-primary" />
+          <span>Lịch học: <strong className="text-slate-700 dark:text-slate-300">{currentClassSchedule}</strong></span>
+          {!showAllDays && <span className="text-slate-400 italic">(Đang ẩn các ngày nghỉ)</span>}
+        </div>
+      )}
 
       <div className="flex-1 bg-white dark:bg-dark-800 rounded-xl border border-slate-200 dark:border-dark-700 shadow-lg overflow-hidden flex flex-col relative">
            <style>{`
