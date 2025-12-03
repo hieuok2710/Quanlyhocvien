@@ -470,7 +470,19 @@ const App: React.FC = () => {
       const dataKey = getStorageKey(BASE_KEYS.DATA, email);
       const savedData = localStorage.getItem(dataKey);
       if (savedData) {
-        setData(JSON.parse(savedData));
+        const parsedData = JSON.parse(savedData);
+        
+        // --- DATA CLEANUP SCRIPT ---
+        // Yêu cầu: Xóa học viên "Ngô Thị Lệ 19"
+        // Kiểm tra và xóa nếu tồn tại trong dữ liệu đã lưu
+        const targetName = "Ngô Thị Lệ 19";
+        if (parsedData.students && parsedData.students.some((s: any) => s.name === targetName)) {
+            parsedData.students = parsedData.students.filter((s: any) => s.name !== targetName);
+            localStorage.setItem(dataKey, JSON.stringify(parsedData)); // Cập nhật lại kho lưu trữ
+        }
+        // ---------------------------
+
+        setData(parsedData);
       } else {
         // First time for this user? Generate Mock Data
         const mock = generateMockData();
