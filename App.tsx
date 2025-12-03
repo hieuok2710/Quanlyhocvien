@@ -8,7 +8,7 @@ import AttendanceManager from './components/AttendanceManager';
 import Settings from './components/Settings';
 import FeedbackModal from './components/FeedbackModal';
 import { Student, ClassRoom, ViewState, StudentStatus, SystemSettings, UserProfile, UserAccount } from './types';
-import { MessageSquarePlus, Hexagon, ArrowRight, UserCircle, Mail, Lock, UserPlus, Eye, EyeOff, LogIn } from 'lucide-react';
+import { MessageSquarePlus, Hexagon, ArrowRight, UserCircle, Mail, Lock, UserPlus, Eye, EyeOff, LogIn, BarChart2, Users, CalendarCheck, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 // --- STORAGE KEY HELPERS ---
 const getStorageKey = (prefix: string, email: string) => `${prefix}_${email}`;
@@ -115,6 +115,47 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onRegister }) => {
   const [showPass, setShowPass] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Feature Slider State
+  const [currentFeature, setCurrentFeature] = useState(0);
+
+  const features = [
+    {
+      title: "Thống kê & Báo cáo Thông minh",
+      desc: "Theo dõi hiệu suất đào tạo với biểu đồ trực quan realtime.",
+      icon: BarChart2,
+      color: "text-cyan-400",
+      bg: "bg-cyan-500/10"
+    },
+    {
+      title: "Quản lý Học viên Toàn diện",
+      desc: "Lưu trữ hồ sơ chi tiết, lịch sử điểm số và quá trình phát triển.",
+      icon: Users,
+      color: "text-purple-400",
+      bg: "bg-purple-500/10"
+    },
+    {
+      title: "Điểm danh & Học phí",
+      desc: "Điểm danh nhanh chóng theo lịch học. Theo dõi trạng thái đóng học phí.",
+      icon: CalendarCheck,
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10"
+    },
+    {
+      title: "Phân quyền & Bảo mật",
+      desc: "Hệ thống phân quyền chi tiết cho Admin và Giáo viên.",
+      icon: ShieldCheck,
+      color: "text-rose-400",
+      bg: "bg-rose-500/10"
+    }
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentFeature((prev) => (prev + 1) % features.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,7 +180,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onRegister }) => {
         }
         const success = await onRegister(formData.email, formData.password, formData.name || formData.email.split('@')[0]);
         if (!success) setError("Email này đã được sử dụng.");
-        else setMode('LOGIN'); // Switch to login after success (or auto login if preferred)
+        else setMode('LOGIN'); 
       }
     } catch (err) {
       setError("Đã xảy ra lỗi hệ thống.");
@@ -149,183 +190,248 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onRegister }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/20 rounded-full blur-[100px] animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-pink-500/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
-      </div>
-
-      <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md relative z-10 border border-slate-700">
-        <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 via-indigo-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/40">
-            <Hexagon className="text-white w-8 h-8 fill-white/20" />
-          </div>
-        </div>
-        
-        <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-white mb-1">
-          {mode === 'LOGIN' ? 'Đăng nhập Hệ thống' : 'Đăng ký Tài khoản'}
-        </h2>
-        <p className="text-center text-slate-500 dark:text-slate-400 mb-8 text-sm">
-          {mode === 'LOGIN' ? 'Chào mừng bạn quay trở lại EduNova' : 'Tạo tài khoản để bắt đầu quản lý'}
-        </p>
-
-        {error && (
-          <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-500 text-xs font-bold text-center">
-            {error}
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {mode === 'REGISTER' && (
-            <div className="animate-slide-up">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <input 
-                  type="email" 
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  placeholder="email@example.com"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white pl-10 pr-4 py-3 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
-                  required
-                />
-              </div>
-            </div>
-          )}
-
-          {mode === 'REGISTER' && (
-            <div className="animate-slide-up">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Mật khẩu</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <input 
-                  type={showPass ? "text" : "password"} 
-                  value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  placeholder="••••••••"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white pl-10 pr-10 py-3 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
-                  required
-                />
-                <button 
-                  type="button" 
-                  onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-500"
-                >
-                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {mode === 'REGISTER' && (
-            <div className="animate-slide-up">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Xác nhận Mật khẩu</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <input 
-                  type={showPass ? "text" : "password"} 
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                  placeholder="••••••••"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white pl-10 pr-4 py-3 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
-                  required
-                />
-              </div>
-            </div>
-          )}
-
-          {mode === 'REGISTER' && (
-            <div className="animate-slide-up">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Tên hiển thị</label>
-              <div className="relative">
-                <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <input 
-                  type="text" 
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  placeholder="Nguyễn Văn A"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white pl-10 pr-4 py-3 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
-                />
-              </div>
-            </div>
-          )}
-
-          {mode === 'LOGIN' && (
-             <>
-               <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input 
-                      type="email" 
-                      value={formData.email}
-                      onChange={(e) => setFormData({...formData, email: e.target.value})}
-                      placeholder="email@example.com"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white pl-10 pr-4 py-3 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Mật khẩu</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input 
-                      type={showPass ? "text" : "password"} 
-                      value={formData.password}
-                      onChange={(e) => setFormData({...formData, password: e.target.value})}
-                      placeholder="••••••••"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white pl-10 pr-10 py-3 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
-                      required
-                    />
-                    <button 
-                      type="button" 
-                      onClick={() => setShowPass(!showPass)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-500"
-                    >
-                      {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-             </>
-          )}
-
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 mt-4"
-          >
-            {isLoading ? (
-              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            ) : (
-              <>
-                {mode === 'LOGIN' ? 'Đăng nhập' : 'Đăng ký ngay'} <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-slate-500">
-            {mode === 'LOGIN' ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'}
-            <button 
-              onClick={() => {
-                setMode(mode === 'LOGIN' ? 'REGISTER' : 'LOGIN');
-                setError(null);
-                setFormData({ email: '', password: '', confirmPassword: '', name: '' });
-              }}
-              className="text-indigo-500 font-bold ml-1 hover:underline"
-            >
-              {mode === 'LOGIN' ? 'Đăng ký ngay' : 'Đăng nhập'}
-            </button>
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 lg:p-0 relative overflow-hidden font-sans">
       
-      <div className="absolute bottom-6 text-slate-500 text-xs opacity-60">
-        © 2024 EduNova Management System v2.0
+      {/* GLOBAL BACKGROUND EFFECTS (Full Screen) */}
+      <div className="absolute inset-0 z-0">
+          <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/30 rounded-full blur-[120px] animate-pulse"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+      </div>
+
+      {/* CENTERED CARD CONTAINER */}
+      <div className="relative z-10 w-full max-w-5xl h-auto lg:h-[600px] flex rounded-3xl shadow-2xl">
+         
+         {/* THE GLOWING/BLINKING FRAME EFFECT */}
+         <div className="absolute -inset-[3px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl opacity-75 blur-md animate-pulse"></div>
+         
+         {/* INNER CARD CONTENT */}
+         <div className="relative flex flex-col lg:flex-row w-full h-full bg-white dark:bg-slate-950 rounded-3xl overflow-hidden border border-slate-700/50">
+            
+            {/* LEFT SIDE: BANNER */}
+            <div className="hidden lg:flex w-5/12 relative bg-slate-900 overflow-hidden flex-col justify-between p-10 border-r border-slate-800">
+              {/* Background for Banner part */}
+              <div className="absolute inset-0 bg-slate-900/50 z-0"></div>
+
+              {/* Logo Area */}
+              <div className="relative z-10 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+                    <Hexagon className="text-white w-6 h-6 fill-white/20" />
+                </div>
+                <div>
+                    <h1 className="text-xl font-bold text-white tracking-tight">EduNova</h1>
+                    <p className="text-[10px] text-slate-400 font-medium tracking-widest uppercase">Management System</p>
+                </div>
+              </div>
+
+              {/* Feature Slider */}
+              <div className="relative z-10 flex-1 flex flex-col justify-center py-8">
+                {features.map((feature, idx) => (
+                  <div 
+                    key={idx}
+                    className={`transition-all duration-700 absolute w-full ${
+                      idx === currentFeature 
+                        ? 'opacity-100 translate-x-0 relative' 
+                        : 'opacity-0 -translate-x-8 absolute pointer-events-none'
+                    }`}
+                  >
+                      <div className={`w-12 h-12 rounded-xl ${feature.bg} flex items-center justify-center mb-4 border border-white/5`}>
+                        <feature.icon className={`w-6 h-6 ${feature.color}`} />
+                      </div>
+                      <h2 className="text-2xl font-bold text-white mb-3 leading-tight">{feature.title}</h2>
+                      <p className="text-slate-400 text-sm leading-relaxed">{feature.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Indicators */}
+              <div className="relative z-10 flex gap-2">
+                {features.map((_, idx) => (
+                    <button 
+                      key={idx}
+                      onClick={() => setCurrentFeature(idx)}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentFeature ? 'w-6 bg-indigo-500' : 'w-1.5 bg-slate-700 hover:bg-slate-600'}`}
+                    />
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT SIDE: FORM */}
+            <div className="w-full lg:w-7/12 flex items-center justify-center p-8 sm:p-12 relative bg-white dark:bg-slate-950">
+              <div className="w-full max-w-sm space-y-6">
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                    {mode === 'LOGIN' ? 'Đăng nhập hệ thống' : 'Tạo tài khoản mới'}
+                  </h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    {mode === 'LOGIN' ? 'Chào mừng bạn quay trở lại EduNova' : 'Đăng ký để quản lý lớp học hiệu quả'}
+                  </p>
+                </div>
+
+                {error && (
+                  <div className="p-3 bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-800 rounded-lg flex items-center gap-3 animate-slide-up">
+                    <ShieldCheck className="w-4 h-4 text-rose-500 shrink-0" />
+                    <p className="text-xs font-medium text-rose-600 dark:text-rose-400">{error}</p>
+                  </div>
+                )}
+                
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {mode === 'REGISTER' && (
+                    <div className="space-y-1 animate-slide-up">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Email đăng nhập</label>
+                      <div className="relative group">
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                        <input 
+                          type="email" 
+                          value={formData.email}
+                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                          placeholder="name@company.com"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all text-sm"
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {mode === 'REGISTER' && (
+                    <div className="space-y-1 animate-slide-up">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Mật khẩu</label>
+                      <div className="relative group">
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                        <input 
+                          type={showPass ? "text" : "password"} 
+                          value={formData.password}
+                          onChange={(e) => setFormData({...formData, password: e.target.value})}
+                          placeholder="••••••••"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white pl-10 pr-10 py-2.5 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all text-sm"
+                          required
+                        />
+                        <button 
+                          type="button" 
+                          onClick={() => setShowPass(!showPass)}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors"
+                        >
+                          {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {mode === 'REGISTER' && (
+                    <div className="space-y-1 animate-slide-up">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Xác nhận mật khẩu</label>
+                      <div className="relative group">
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                        <input 
+                          type={showPass ? "text" : "password"} 
+                          value={formData.confirmPassword}
+                          onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                          placeholder="••••••••"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all text-sm"
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {mode === 'REGISTER' && (
+                    <div className="space-y-1 animate-slide-up">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Tên hiển thị (Tùy chọn)</label>
+                      <div className="relative group">
+                        <UserCircle className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                        <input 
+                          type="text" 
+                          value={formData.name}
+                          onChange={(e) => setFormData({...formData, name: e.target.value})}
+                          placeholder="Nguyễn Văn A"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all text-sm"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {mode === 'LOGIN' && (
+                    <>
+                      <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Email</label>
+                          <div className="relative group">
+                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                            <input 
+                              type="email" 
+                              value={formData.email}
+                              onChange={(e) => setFormData({...formData, email: e.target.value})}
+                              placeholder="admin@gmail.com"
+                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all text-sm"
+                              required
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Mật khẩu</label>
+                            <button type="button" className="text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Quên mật khẩu?</button>
+                          </div>
+                          <div className="relative group">
+                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                            <input 
+                              type={showPass ? "text" : "password"} 
+                              value={formData.password}
+                              onChange={(e) => setFormData({...formData, password: e.target.value})}
+                              placeholder="••••••••"
+                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white pl-10 pr-10 py-2.5 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all text-sm"
+                              required
+                            />
+                            <button 
+                              type="button" 
+                              onClick={() => setShowPass(!showPass)}
+                              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors"
+                            >
+                              {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+                    </>
+                  )}
+
+                  <button 
+                    type="submit" 
+                    disabled={isLoading}
+                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 mt-4"
+                  >
+                    {isLoading ? (
+                      <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    ) : (
+                      <>
+                        {mode === 'LOGIN' ? 'Đăng nhập' : 'Tạo tài khoản'} <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                <div className="relative py-2">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200 dark:border-slate-800"></div></div>
+                  <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest"><span className="bg-white dark:bg-slate-950 px-2 text-slate-400">Hoặc</span></div>
+                </div>
+
+                <div className="text-center">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    {mode === 'LOGIN' ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'}
+                    <button 
+                      onClick={() => {
+                        setMode(mode === 'LOGIN' ? 'REGISTER' : 'LOGIN');
+                        setError(null);
+                        setFormData({ email: '', password: '', confirmPassword: '', name: '' });
+                      }}
+                      className="text-indigo-600 dark:text-indigo-400 font-bold ml-1 hover:underline transition-all"
+                    >
+                      {mode === 'LOGIN' ? 'Đăng ký ngay' : 'Đăng nhập'}
+                    </button>
+                  </p>
+                </div>
+              </div>
+            </div>
+         </div>
       </div>
     </div>
   );
