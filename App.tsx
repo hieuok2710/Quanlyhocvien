@@ -16,7 +16,10 @@ const BASE_KEYS = {
   DATA: 'edunova_data',
   SETTINGS: 'edunova_settings',
   PROFILE: 'edunova_profile',
-  USERS: 'edunova_users_db' // Global user database
+  USERS: 'edunova_users_db', // Global user database
+  REMEMBER_EMAIL: 'edunova_remember_email',
+  REMEMBER_PASS: 'edunova_remember_pass',
+  REMEMBER_CHECK: 'edunova_remember_check'
 };
 
 // --- MOCK DATA GENERATION ---
@@ -111,6 +114,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onRegister }) => {
     confirmPassword: '',
     name: ''
   });
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -149,6 +153,17 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onRegister }) => {
     }
   ];
 
+  // Load remembered credentials
+  useEffect(() => {
+    const isRemembered = localStorage.getItem(BASE_KEYS.REMEMBER_CHECK) === 'true';
+    if (isRemembered) {
+      const email = localStorage.getItem(BASE_KEYS.REMEMBER_EMAIL) || '';
+      const pass = localStorage.getItem(BASE_KEYS.REMEMBER_PASS) || '';
+      setFormData(prev => ({ ...prev, email, password: pass }));
+      setRememberMe(true);
+    }
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentFeature((prev) => (prev + 1) % features.length);
@@ -164,7 +179,20 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onRegister }) => {
     try {
       if (mode === 'LOGIN') {
         const success = await onLogin(formData.email, formData.password);
-        if (!success) setError("Email hoặc mật khẩu không chính xác.");
+        if (success) {
+          // Handle Remember Me logic
+          if (rememberMe) {
+            localStorage.setItem(BASE_KEYS.REMEMBER_EMAIL, formData.email);
+            localStorage.setItem(BASE_KEYS.REMEMBER_PASS, formData.password);
+            localStorage.setItem(BASE_KEYS.REMEMBER_CHECK, 'true');
+          } else {
+            localStorage.removeItem(BASE_KEYS.REMEMBER_EMAIL);
+            localStorage.removeItem(BASE_KEYS.REMEMBER_PASS);
+            localStorage.setItem(BASE_KEYS.REMEMBER_CHECK, 'false');
+          }
+        } else {
+          setError("Email hoặc mật khẩu không chính xác.");
+        }
       } else {
         // Validation
         if (formData.password !== formData.confirmPassword) {
@@ -219,7 +247,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onRegister }) => {
                 </div>
                 <div>
                     <h1 className="text-xl font-bold text-white tracking-tight">EduNova</h1>
-                    <p className="text-[10px] text-slate-400 font-medium tracking-widest uppercase">Management System</p>
+                    <p className="text-[10px] text-slate-400 font-medium tracking-wider uppercase">Management System</p>
                 </div>
               </div>
 
@@ -257,7 +285,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onRegister }) => {
 
             {/* RIGHT SIDE: FORM */}
             <div className="w-full lg:w-7/12 flex items-center justify-center p-8 sm:p-12 relative bg-white dark:bg-slate-950">
-              <div className="w-full max-w-sm space-y-6">
+              <div className="w-full max-sm:px-4 w-full max-w-sm space-y-6">
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                     {mode === 'LOGIN' ? 'Đăng nhập hệ thống' : 'Tạo tài khoản mới'}
@@ -390,6 +418,24 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onRegister }) => {
                             </button>
                           </div>
                         </div>
+
+                        {/* Remember Me Checkbox */}
+                        <div className="flex items-center justify-between py-1">
+                          <label className="flex items-center gap-2 cursor-pointer group">
+                             <div className="relative flex items-center">
+                                <input 
+                                   type="checkbox" 
+                                   checked={rememberMe}
+                                   onChange={(e) => setRememberMe(e.target.checked)}
+                                   className="sr-only peer" 
+                                />
+                                <div className="w-5 h-5 border-2 border-slate-300 dark:border-slate-700 rounded-md peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-all flex items-center justify-center">
+                                   <div className={`w-2.5 h-1.5 border-l-2 border-b-2 border-white -rotate-45 mb-0.5 transition-opacity ${rememberMe ? 'opacity-100' : 'opacity-0'}`} />
+                                </div>
+                             </div>
+                             <span className="text-xs font-medium text-slate-600 dark:text-slate-400 group-hover:text-indigo-500 transition-colors select-none">Ghi nhớ đăng nhập</span>
+                          </label>
+                        </div>
                     </>
                   )}
 
@@ -459,14 +505,28 @@ const App: React.FC = () => {
   useEffect(() => {
     // Load users from local storage or initialize default Admin
     const savedUsers = localStorage.getItem(BASE_KEYS.USERS);
+    const targetPassword = 'Admin25##';
+    
     if (savedUsers) {
-      setAllUsers(JSON.parse(savedUsers));
+      const parsedUsers: UserAccount[] = JSON.parse(savedUsers);
+      
+      // CRITICAL FIX: Ensure the default admin account ALWAYS has the updated password
+      // This prevents login failures if LocalStorage had an older password saved.
+      const updatedUsers = parsedUsers.map(u => {
+        if (u.email.toLowerCase() === 'admin@gmail.com' && u.password !== targetPassword) {
+           return { ...u, password: targetPassword };
+        }
+        return u;
+      });
+      
+      setAllUsers(updatedUsers);
+      localStorage.setItem(BASE_KEYS.USERS, JSON.stringify(updatedUsers));
     } else {
       const adminUser: UserAccount = {
         id: 'ADMIN-001',
         name: 'Super Admin',
         email: 'admin@gmail.com',
-        password: 'Admin25##', // Updated default password
+        password: targetPassword, 
         role: 'Quản trị viên cấp cao',
         avatar: 'https://ui-avatars.com/api/?name=Super+Admin&background=6366f1&color=fff&bold=true',
         isActive: true,
@@ -512,6 +572,7 @@ const App: React.FC = () => {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 800));
 
+    // Case-insensitive email check
     const user = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === pass);
     
     if (user) {
@@ -531,7 +592,6 @@ const App: React.FC = () => {
     localStorage.removeItem('edunova_current_user');
 
     // 2. Clear All App States immediately to force re-render to AuthScreen
-    // This is more reliable than window.location.reload() in many environments
     setCurrentUser(null);
     setData(null);
     setSettings(null);
@@ -566,7 +626,6 @@ const App: React.FC = () => {
   };
 
   // --- DATA LOADING & SYNC LOGIC ---
-  // When currentUser changes, load THEIR data
   useEffect(() => {
     if (currentUser) {
       const email = currentUser.email;
@@ -578,18 +637,15 @@ const App: React.FC = () => {
         const parsedData = JSON.parse(savedData);
         
         // --- DATA CLEANUP SCRIPT ---
-        // Yêu cầu: Xóa học viên "Ngô Thị Lệ 19"
-        // Kiểm tra và xóa nếu tồn tại trong dữ liệu đã lưu
         const targetName = "Ngô Thị Lệ 19";
         if (parsedData.students && parsedData.students.some((s: any) => s.name === targetName)) {
             parsedData.students = parsedData.students.filter((s: any) => s.name !== targetName);
-            localStorage.setItem(dataKey, JSON.stringify(parsedData)); // Cập nhật lại kho lưu trữ
+            localStorage.setItem(dataKey, JSON.stringify(parsedData)); 
         }
         // ---------------------------
 
         setData(parsedData);
       } else {
-        // First time for this user? Generate Mock Data
         const mock = generateMockData();
         setData(mock);
         localStorage.setItem(dataKey, JSON.stringify(mock));
@@ -601,7 +657,6 @@ const App: React.FC = () => {
       if (savedSettings) {
         setSettings(JSON.parse(savedSettings));
       } else {
-        // Default settings
         const defaultSettings: SystemSettings = {
           itemsPerPage: 10,
           enableNotifications: true,
@@ -613,23 +668,20 @@ const App: React.FC = () => {
         localStorage.setItem(settingsKey, JSON.stringify(defaultSettings));
       }
       
-      // 3. Update Profile from Storage (in case they changed avatar in settings)
+      // 3. Update Profile from Storage
       const profileKey = getStorageKey(BASE_KEYS.PROFILE, email);
       const savedProfile = localStorage.getItem(profileKey);
       if (savedProfile) {
         const fullProfile = JSON.parse(savedProfile);
-        // Merge with current session info just in case
         setCurrentUser(prev => ({ ...prev!, ...fullProfile }));
       }
 
     } else {
-      // No user, reset theme
       document.documentElement.classList.remove('dark');
     }
-  }, [currentUser?.email]); // Only re-run if email changes (login/switch user)
+  }, [currentUser?.email]);
 
   // --- DATA PERSISTENCE ---
-  // Save Data whenever it changes (only if user logged in)
   useEffect(() => {
     if (currentUser && data) {
       const key = getStorageKey(BASE_KEYS.DATA, currentUser.email);
@@ -637,13 +689,11 @@ const App: React.FC = () => {
     }
   }, [data, currentUser]);
 
-  // Save Settings & Theme
   useEffect(() => {
     if (currentUser && settings) {
       const key = getStorageKey(BASE_KEYS.SETTINGS, currentUser.email);
       localStorage.setItem(key, JSON.stringify(settings));
       
-      // Apply Theme
       if (settings.themeMode === 'dark') {
         document.documentElement.classList.add('dark');
       } else {
@@ -652,12 +702,10 @@ const App: React.FC = () => {
     }
   }, [settings, currentUser]);
 
-  // Save Profile Changes
   useEffect(() => {
     if (currentUser) {
       const key = getStorageKey(BASE_KEYS.PROFILE, currentUser.email);
       localStorage.setItem(key, JSON.stringify(currentUser));
-      // Also update session storage
       localStorage.setItem('edunova_current_user', JSON.stringify(currentUser));
     }
   }, [currentUser]);
@@ -669,7 +717,6 @@ const App: React.FC = () => {
     if (currentUser) {
       const updatedUser = { ...currentUser, ...newProfile };
       setCurrentUser(updatedUser);
-      // Also update in the global user list
       setAllUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
     }
   };
@@ -728,7 +775,6 @@ const App: React.FC = () => {
     return <AuthScreen onLogin={handleLogin} onRegister={handleRegister} />;
   }
 
-  // Show loading if logged in but data fetching is pending
   if (!data || !settings) {
      return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">
         <span className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></span>
@@ -749,7 +795,6 @@ const App: React.FC = () => {
           onUpdateProfile={handleUpdateProfile} 
           data={data} 
           onRestore={handleRestoreData}
-          // Admin Props
           allUsers={allUsers}
           onAddUser={handleAddUser}
           onUpdateUser={handleUpdateUser}
