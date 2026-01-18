@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -467,7 +466,7 @@ const App: React.FC = () => {
         id: 'ADMIN-001',
         name: 'Super Admin',
         email: 'admin@gmail.com',
-        password: 'admin##', // Plaintext for demo only
+        password: 'Admin25##', // Updated default password
         role: 'Quản trị viên cấp cao',
         avatar: 'https://ui-avatars.com/api/?name=Super+Admin&background=6366f1&color=fff&bold=true',
         isActive: true,
